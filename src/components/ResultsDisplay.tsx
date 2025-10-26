@@ -4,9 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, Activity } from "lucide-react";
 
 export interface PredictionResults {
-  chemotherapy: string;
-  radio_therapy: string;
-  hormone_therapy: string;
+  Chemotherapy: string;
+  "Radio Therapy": string;
+  "Hormone Therapy": string;
 }
 
 interface ResultsDisplayProps {
@@ -17,30 +17,30 @@ export const ResultsDisplay = ({ results }: ResultsDisplayProps) => {
   const treatments = [
     {
       name: "Chemotherapy",
-      value: results.chemotherapy,
+      value: results.Chemotherapy,
       icon: Activity,
       description: "Systemic drug treatment to destroy cancer cells",
     },
     {
       name: "Radio Therapy",
-      value: results.radio_therapy,
+      value: results["Radio Therapy"],
       icon: Activity,
       description: "High-energy radiation to kill cancer cells",
     },
     {
       name: "Hormone Therapy",
-      value: results.hormone_therapy,
+      value: results["Hormone Therapy"],
       icon: Activity,
       description: "Treatment to block hormones that fuel cancer growth",
     },
   ];
 
   const getStatusColor = (value: string) => {
-    return value.toLowerCase() === "yes" ? "success" : "destructive";
+    return value?.toLowerCase() === "yes" ? "success" : "destructive";
   };
 
   const getStatusIcon = (value: string) => {
-    return value.toLowerCase() === "yes" ? CheckCircle2 : XCircle;
+    return value?.toLowerCase() === "yes" ? CheckCircle2 : XCircle;
   };
 
   return (
@@ -60,7 +60,7 @@ export const ResultsDisplay = ({ results }: ResultsDisplayProps) => {
             {treatments.map((treatment, index) => {
               const StatusIcon = getStatusIcon(treatment.value);
               const statusColor = getStatusColor(treatment.value);
-              const isRecommended = treatment.value.toLowerCase() === "yes";
+              const isRecommended = treatment.value?.toLowerCase() === "yes";
 
               return (
                 <motion.div
