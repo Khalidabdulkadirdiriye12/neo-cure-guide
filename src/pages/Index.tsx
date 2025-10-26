@@ -19,34 +19,9 @@ const Index = () => {
     setResults(null);
 
     try {
-      // Transform data to API format
-      const apiData = {
-        "Age at Diagnosis": data.age_at_diagnosis,
-        "Neoplasm Histologic Grade": data.neoplasm_histologic_grade,
-        "HER2 Status": data.her2_status,
-        "ER Status": data.er_status,
-        "PR Status": data.pr_status,
-        "Tumor Size": data.tumor_size,
-        "Tumor Stage": data.tumor_stage,
-        "Lymph nodes examined positive": data.lymph_nodes_examined_positive,
-        "Mutation Count": data.mutation_count,
-        "Nottingham prognostic index": data.nottingham_prognostic_index,
-        "Inferred Menopausal State": data.inferred_menopausal_state,
-        "BRCA1": data.brca1,
-        "BRCA2": data.brca2,
-        "TP53": data.tp53,
-        "ERBB2": data.erbb2,
-        "ESR1": data.esr1,
-        "PGR": data.pgr,
-        "AKT1": data.akt1,
-        "PIK3CA": data.pik3ca,
-        "MKI67": data.mki67,
-        "CDH1": data.cdh1,
-      };
-
       const response = await axios.post<PredictionResults>(
         "http://localhost:8000/predict/",
-        apiData,
+        data,
         {
           headers: {
             "Content-Type": "application/json",
