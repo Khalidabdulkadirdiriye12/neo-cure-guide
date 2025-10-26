@@ -1,12 +1,10 @@
 import { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { Stethoscope } from "lucide-react";
 import { PatientForm, PatientData } from "@/components/PatientForm";
 import { ResultsDisplay, PredictionResults } from "@/components/ResultsDisplay";
 import { LoadingAnimation } from "@/components/LoadingAnimation";
 import { ModelInsights } from "@/components/ModelInsights";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
@@ -47,74 +45,30 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-medical">
-      {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <motion.div
-              className="flex items-center gap-3"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="p-2 bg-gradient-primary rounded-lg">
-                <Stethoscope className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                  AI Treatment Recommender
-                </h1>
-                <p className="text-sm text-muted-foreground">Cancer Treatment Decision Support</p>
-              </div>
-            </motion.div>
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Form Section */}
+      <div className="lg:col-span-2 space-y-6">
+        <PatientForm onSubmit={handleSubmit} isLoading={isLoading} />
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Form Section */}
-          <div className="lg:col-span-2 space-y-6">
-            <PatientForm onSubmit={handleSubmit} isLoading={isLoading} />
-
-            {/* Loading State */}
-            {isLoading && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="bg-card rounded-lg shadow-medical border"
-              >
-                <LoadingAnimation />
-              </motion.div>
-            )}
-
-            {/* Results */}
-            {results && !isLoading && <ResultsDisplay results={results} />}
-          </div>
-
-          {/* Insights Panel */}
-          <div className="lg:col-span-1">
-            <ModelInsights />
-          </div>
-        </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="mt-16 border-t bg-card/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-6">
-          <motion.p
-            className="text-center text-sm text-muted-foreground"
+        {/* Loading State */}
+        {isLoading && (
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
+            className="bg-card rounded-lg shadow-medical border"
           >
-            Powered by <span className="font-semibold text-primary">Som Innovation AI Engine</span>
-          </motion.p>
-        </div>
-      </footer>
+            <LoadingAnimation />
+          </motion.div>
+        )}
+
+        {/* Results */}
+        {results && !isLoading && <ResultsDisplay results={results} />}
+      </div>
+
+      {/* Insights Panel */}
+      <div className="lg:col-span-1">
+        <ModelInsights />
+      </div>
     </div>
   );
 };

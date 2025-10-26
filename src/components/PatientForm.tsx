@@ -247,7 +247,7 @@ export const PatientForm = ({ onSubmit, isLoading }: PatientFormProps) => {
       <Card className="shadow-medical border-border/50">
         <CardHeader className="bg-gradient-medical">
           <CardTitle className="text-secondary">Genetic Data</CardTitle>
-          <CardDescription>Gene expression markers (0 = Not expressed, 1 = Expressed)</CardDescription>
+          <CardDescription>Gene expression markers (values between 0 and 1)</CardDescription>
         </CardHeader>
         <CardContent className="pt-6 space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -270,6 +270,7 @@ export const PatientForm = ({ onSubmit, isLoading }: PatientFormProps) => {
                 <Input
                   id={gene.key}
                   type="number"
+                  step="0.01"
                   min="0"
                   max="1"
                   value={formData[gene.key as keyof PatientData]}

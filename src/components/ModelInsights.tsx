@@ -6,7 +6,7 @@ export const ModelInsights = () => {
   const insights = [
     {
       label: "Model Confidence",
-      value: 94,
+      value: 85,
       icon: Brain,
       description: "Overall prediction confidence",
     },
@@ -18,7 +18,7 @@ export const ModelInsights = () => {
     },
     {
       label: "Accuracy Score",
-      value: 92,
+      value: 85,
       icon: TrendingUp,
       description: "Historical model accuracy",
     },
@@ -52,10 +52,13 @@ export const ModelInsights = () => {
           <h4 className="text-sm font-semibold">Model Information</h4>
           <div className="space-y-2 text-xs text-muted-foreground">
             <p>
-              <span className="font-medium text-foreground">Algorithm:</span> Ensemble Machine Learning
+              <span className="font-medium text-foreground">Algorithm:</span> XGBoost
             </p>
             <p>
-              <span className="font-medium text-foreground">Training Data:</span> 10,000+ patient records
+              <span className="font-medium text-foreground">Accuracy:</span> 85%
+            </p>
+            <p>
+              <span className="font-medium text-foreground">Training Data:</span> Metabric Dataset
             </p>
             <p>
               <span className="font-medium text-foreground">Last Updated:</span> January 2025
