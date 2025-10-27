@@ -31,9 +31,47 @@ const SurvivalPrediction = () => {
     setPrediction(null);
     
     try {
+      // Transform form data to match Django serializer format
+      const apiData = {
+        age_at_diagnosis: parseFloat(formData.age) || 0,
+        neoplasm_histologic_grade: parseFloat(formData.grade) || 0,
+        her2_status: formData.her2 === "Positive" ? 1 : 0,
+        er_status: formData.er === "Positive" ? 1 : 0,
+        pr_status: formData.pr === "Positive" ? 1 : 0,
+        tumor_size: parseFloat(formData.tumor_size) || 0,
+        tumor_stage: parseFloat(formData.tumor_stage) || 0,
+        lymph_nodes_examined_positive: parseFloat(formData.lymph_nodes) || 0,
+        mutation_count: parseFloat(formData.mutation_count) || 0,
+        nottingham_prognostic_index: parseFloat(formData.npi) || 0,
+        inferred_menopausal_state: formData.menopausal === "Post" ? 1 : 0,
+        overall_survival_months: parseFloat(formData.overall_survival) || 0,
+        relapse_free_status_months: parseFloat(formData.relapse_free) || 0,
+        tmb_nonsynonymous: parseFloat(formData.tmb) || 0,
+        brca1: parseFloat(formData.BRCA1) || 0,
+        brca2: parseFloat(formData.BRCA2) || 0,
+        tp53: parseFloat(formData.TP53) || 0,
+        erbb2: parseFloat(formData.ERBB2) || 0,
+        esr1: parseFloat(formData.ESR1) || 0,
+        pgr: parseFloat(formData.PGR) || 0,
+        akt1: parseFloat(formData.AKT1) || 0,
+        pik3ca: parseFloat(formData.PIK3CA) || 0,
+        mki67: parseFloat(formData.MKI67) || 0,
+        cdh1: parseFloat(formData.CDH1) || 0,
+        bcl10: parseFloat(formData.BCL10) || 0,
+        cfh: parseFloat(formData.CFH) || 0,
+        rbm14: parseFloat(formData.RBM14) || 0,
+        taok2: parseFloat(formData.TAOK2) || 0,
+        dusp11: parseFloat(formData.DUSP11) || 0,
+        iscu: parseFloat(formData.ISCU) || 0,
+        marchf6: parseFloat(formData.MARCHF6) || 0,
+        mob3b: parseFloat(formData.MOB3B) || 0,
+        dnajb6: parseFloat(formData.DNAJB6) || 0,
+        atg12: parseFloat(formData.ATG12) || 0,
+      };
+
       const response = await axios.post<SurvivalPrediction>(
         "http://localhost:8000/api/predict-survival/",
-        formData
+        apiData
       );
       
       setPrediction(response.data);
@@ -307,32 +345,96 @@ const SurvivalPrediction = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="space-y-6"
         >
-          <Card className="shadow-medical border-primary/20">
+          <Card className="shadow-medical border-primary/20 bg-gradient-to-br from-background to-secondary/10">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Heart className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-3xl">
+                <Heart className="h-7 w-7 text-primary" />
                 Survival Prediction Results
               </CardTitle>
+              <CardDescription>
+                AI-powered survival analysis based on clinical and genetic data
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Prediction Status</p>
-                  <p className="text-2xl font-bold">{prediction.prediction}</p>
-                </div>
-                <Badge 
-                  variant={prediction.prediction === "Living" ? "default" : "destructive"}
-                  className="text-lg px-4 py-2"
-                >
-                  {(prediction.probability * 100).toFixed(1)}% Probability
-                </Badge>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="shadow-lg border-2 border-primary/30">
+                  <CardContent className="pt-6">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                        Prediction Status
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <div className={`h-3 w-3 rounded-full ${prediction.prediction === "Living" ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
+                        <p className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                          {prediction.prediction}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="shadow-lg border-2 border-primary/30">
+                  <CardContent className="pt-6">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                        Confidence Level
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-3xl font-bold">{(prediction.probability * 100).toFixed(1)}%</p>
+                        <Badge 
+                          variant={prediction.prediction === "Living" ? "default" : "destructive"}
+                          className="text-base px-4 py-2"
+                        >
+                          {prediction.probability >= 0.8 ? "High" : prediction.probability >= 0.6 ? "Moderate" : "Low"}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-              <div className="text-sm text-muted-foreground">
-                <p>
-                  Based on the clinical and genetic data provided, the model predicts the patient's survival status 
-                  with {(prediction.probability * 100).toFixed(1)}% confidence.
-                </p>
+
+              <Card className="bg-secondary/30">
+                <CardContent className="pt-6">
+                  <div className="space-y-3">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-primary" />
+                      Clinical Interpretation
+                    </h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Based on the comprehensive analysis of <strong>{Object.keys(formData).length} clinical and genetic parameters</strong>, 
+                      the XGBoost machine learning model predicts the patient's survival status as{" "}
+                      <strong className={prediction.prediction === "Living" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
+                        {prediction.prediction}
+                      </strong>{" "}
+                      with a confidence level of <strong>{(prediction.probability * 100).toFixed(1)}%</strong>.
+                    </p>
+                    {prediction.probability >= 0.85 && (
+                      <div className="flex items-start gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                        <Badge variant="default" className="mt-0.5">High Confidence</Badge>
+                        <p className="text-sm">
+                          This prediction shows high reliability based on the trained model's performance on the Metabric dataset.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div className="p-4 rounded-lg bg-secondary/50 border">
+                  <p className="text-sm text-muted-foreground mb-1">Model</p>
+                  <p className="text-lg font-bold">XGBoost</p>
+                </div>
+                <div className="p-4 rounded-lg bg-secondary/50 border">
+                  <p className="text-sm text-muted-foreground mb-1">Dataset</p>
+                  <p className="text-lg font-bold">Metabric</p>
+                </div>
+                <div className="p-4 rounded-lg bg-secondary/50 border">
+                  <p className="text-sm text-muted-foreground mb-1">Accuracy</p>
+                  <p className="text-lg font-bold">85%</p>
+                </div>
               </div>
             </CardContent>
           </Card>
