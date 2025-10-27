@@ -52,7 +52,7 @@ export const ModelInsights = () => {
           <h4 className="text-sm font-semibold">Model Information</h4>
           <div className="space-y-2 text-xs text-muted-foreground">
             <p>
-              <span className="font-medium text-foreground">Algorithm:</span> XGBoost
+              <span className="font-medium text-foreground">Algorithm:</span> Random Forest
             </p>
             <p>
               <span className="font-medium text-foreground">Accuracy:</span> 85%

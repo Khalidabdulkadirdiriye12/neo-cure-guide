@@ -56,8 +56,7 @@ export function Layout() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
               >
-                Powered by <span className="font-semibold text-primary">Som Innovation AI Engine</span> | 
-                <span className="font-semibold"> Group 4 Moringa Project</span>
+                <span className="font-semibold text-primary">Moringa School Group 4 Project</span>
               </motion.p>
             </div>
           </footer>

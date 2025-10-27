@@ -404,7 +404,7 @@ const SurvivalPrediction = () => {
                     </h4>
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       Based on the comprehensive analysis of <strong>{Object.keys(formData).length} clinical and genetic parameters</strong>, 
-                      the XGBoost machine learning model predicts the patient's survival status as{" "}
+                      the Random Forest machine learning model predicts the patient's survival status as{" "}
                       <strong className={prediction.prediction === "Living" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
                         {prediction.prediction}
                       </strong>{" "}
@@ -425,7 +425,7 @@ const SurvivalPrediction = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 <div className="p-4 rounded-lg bg-secondary/50 border">
                   <p className="text-sm text-muted-foreground mb-1">Model</p>
-                  <p className="text-lg font-bold">XGBoost</p>
+                  <p className="text-lg font-bold">Random Forest</p>
                 </div>
                 <div className="p-4 rounded-lg bg-secondary/50 border">
                   <p className="text-sm text-muted-foreground mb-1">Dataset</p>
