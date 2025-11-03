@@ -7,6 +7,7 @@ import { Layout } from "./components/Layout";
 import Index from "./pages/Index";
 import TumorDetection from "./pages/TumorDetection";
 import SurvivalPrediction from "./pages/SurvivalPrediction";
+import PatientManagement from "./pages/PatientManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/tumor-detection" element={<TumorDetection />} />
             <Route path="/survival-prediction" element={<SurvivalPrediction />} />
+            <Route path="/patient-management" element={<PatientManagement />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

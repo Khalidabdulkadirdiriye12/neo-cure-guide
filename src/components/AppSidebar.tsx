@@ -1,4 +1,4 @@
-import { Activity, Image, Stethoscope } from "lucide-react";
+import { Activity, Image, Stethoscope, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 import {
@@ -17,6 +17,7 @@ const items = [
   { title: "Treatment Recommender", url: "/", icon: Stethoscope },
   { title: "Tumor Detection", url: "/tumor-detection", icon: Image },
   { title: "Survival Prediction", url: "/survival-prediction", icon: Activity },
+  { title: "Patient Management", url: "/patient-management", icon: Users },
 ];
 
 export function AppSidebar() {
