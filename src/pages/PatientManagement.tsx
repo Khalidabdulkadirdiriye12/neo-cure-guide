@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Users, Plus, Search, Edit, Trash2, Eye, UserPlus } from "lucide-react";
+import { Users, Search, Edit, Trash2, Eye, UserPlus, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,104 +9,119 @@ import { useToast } from "@/hooks/use-toast";
 import { PatientDialog } from "@/components/patients/PatientDialog";
 import { PatientDetailsDialog } from "@/components/patients/PatientDetailsDialog";
 import { DeletePatientDialog } from "@/components/patients/DeletePatientDialog";
-
-export interface Patient {
-  id: string;
-  name: string;
-  age: number;
-  gender: "Male" | "Female" | "Other";
-  contact: string;
-  email: string;
-  diagnosis: string;
-  stage: string;
-  lastVisit: string;
-  status: "Active" | "Under Treatment" | "Recovered" | "Critical";
-  medicalHistory?: string;
-}
-
-const mockPatients: Patient[] = [
-  {
-    id: "1",
-    name: "Sarah Johnson",
-    age: 45,
-    gender: "Female",
-    contact: "+1234567890",
-    email: "sarah.j@email.com",
-    diagnosis: "Breast Cancer",
-    stage: "Stage II",
-    lastVisit: "2025-10-28",
-    status: "Under Treatment",
-    medicalHistory: "Hypertension, Type 2 Diabetes"
-  },
-  {
-    id: "2",
-    name: "Emily Chen",
-    age: 52,
-    gender: "Female",
-    contact: "+1234567891",
-    email: "emily.c@email.com",
-    diagnosis: "Breast Cancer",
-    stage: "Stage I",
-    lastVisit: "2025-10-30",
-    status: "Active",
-    medicalHistory: "None"
-  }
-];
+import { 
+  listPatients, 
+  createPatient, 
+  patchPatient, 
+  deletePatient as deletePatientApi,
+  Patient,
+  CreatePatientData 
+} from "@/services/patientApi";
 
 const PatientManagement = () => {
-  const [patients, setPatients] = useState<Patient[]>(mockPatients);
+  const [patients, setPatients] = useState<Patient[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
   const [viewingPatient, setViewingPatient] = useState<Patient | null>(null);
   const [deletingPatient, setDeletingPatient] = useState<Patient | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
 
-  const filteredPatients = patients.filter(patient =>
-    patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    patient.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    patient.diagnosis.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Fetch patients on mount and when page changes
+  useEffect(() => {
+    fetchPatients();
+  }, [currentPage]);
 
-  const handleAddPatient = (patientData: Omit<Patient, "id">) => {
-    const newPatient: Patient = {
-      ...patientData,
-      id: Date.now().toString(),
-    };
-    setPatients([...patients, newPatient]);
-    setIsAddDialogOpen(false);
-    toast({
-      title: "Patient Added",
-      description: `${patientData.name} has been added successfully.`,
-    });
+  const fetchPatients = async () => {
+    try {
+      setLoading(true);
+      const response = await listPatients(currentPage);
+      setPatients(response.results);
+      setTotalCount(response.count);
+      setTotalPages(Math.ceil(response.count / 10)); // Assuming 10 items per page
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch patients. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEditPatient = (patientData: Omit<Patient, "id">) => {
+  const filteredPatients = patients.filter(patient => {
+    const fullName = `${patient.first_name} ${patient.last_name}`.toLowerCase();
+    const query = searchQuery.toLowerCase();
+    return fullName.includes(query) ||
+      patient.email?.toLowerCase().includes(query) ||
+      patient.diagnosis?.toLowerCase().includes(query);
+  });
+
+  const handleAddPatient = async (patientData: CreatePatientData) => {
+    try {
+      const newPatient = await createPatient(patientData);
+      toast({
+        title: "Patient Added",
+        description: `${patientData.first_name} ${patientData.last_name} has been added successfully.`,
+      });
+      setIsAddDialogOpen(false);
+      fetchPatients(); // Refresh the list
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add patient. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditPatient = async (patientData: CreatePatientData) => {
     if (!editingPatient) return;
     
-    setPatients(patients.map(p => 
-      p.id === editingPatient.id ? { ...patientData, id: editingPatient.id } : p
-    ));
-    setEditingPatient(null);
-    toast({
-      title: "Patient Updated",
-      description: `${patientData.name}'s information has been updated.`,
-    });
+    try {
+      await patchPatient(editingPatient.id, patientData);
+      toast({
+        title: "Patient Updated",
+        description: `${patientData.first_name} ${patientData.last_name}'s information has been updated.`,
+      });
+      setEditingPatient(null);
+      fetchPatients(); // Refresh the list
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update patient. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeletePatient = () => {
+  const handleDeletePatient = async () => {
     if (!deletingPatient) return;
     
-    setPatients(patients.filter(p => p.id !== deletingPatient.id));
-    toast({
-      title: "Patient Removed",
-      description: `${deletingPatient.name} has been removed from the system.`,
-      variant: "destructive",
-    });
-    setDeletingPatient(null);
+    try {
+      await deletePatientApi(deletingPatient.id);
+      toast({
+        title: "Patient Removed",
+        description: `${deletingPatient.first_name} ${deletingPatient.last_name} has been removed from the system.`,
+      });
+      setDeletingPatient(null);
+      fetchPatients(); // Refresh the list
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete patient. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const getStatusColor = (status: Patient["status"]) => {
+  const getStatusColor = (status?: Patient["status"]) => {
+    if (!status) return "bg-secondary";
     switch (status) {
       case "Active": return "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20";
       case "Under Treatment": return "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20";
@@ -151,7 +166,7 @@ const PatientManagement = () => {
                 Patient Records
               </CardTitle>
               <CardDescription>
-                {patients.length} total patients registered
+                {totalCount} total patients registered {totalPages > 1 && `• Page ${currentPage} of ${totalPages}`}
               </CardDescription>
             </div>
             <div className="relative w-full max-w-sm">
@@ -167,7 +182,12 @@ const PatientManagement = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredPatients.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+                <p className="text-muted-foreground">Loading patients...</p>
+              </div>
+            ) : filteredPatients.length === 0 ? (
               <div className="text-center py-12">
                 <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">
@@ -188,32 +208,34 @@ const PatientManagement = () => {
                         <div className="flex-1 space-y-3">
                           <div className="flex items-start justify-between">
                             <div>
-                              <h3 className="text-xl font-semibold">{patient.name}</h3>
+                              <h3 className="text-xl font-semibold">{patient.first_name} {patient.last_name}</h3>
                               <p className="text-sm text-muted-foreground">
-                                {patient.age} years • {patient.gender}
+                                {patient.date_of_birth} • {patient.gender}
                               </p>
                             </div>
-                            <Badge className={getStatusColor(patient.status)}>
-                              {patient.status}
-                            </Badge>
+                            {patient.status && (
+                              <Badge className={getStatusColor(patient.status)}>
+                                {patient.status}
+                              </Badge>
+                            )}
                           </div>
 
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             <div>
                               <p className="text-muted-foreground">Diagnosis</p>
-                              <p className="font-medium">{patient.diagnosis}</p>
+                              <p className="font-medium">{patient.diagnosis || "N/A"}</p>
                             </div>
                             <div>
                               <p className="text-muted-foreground">Stage</p>
-                              <p className="font-medium">{patient.stage}</p>
+                              <p className="font-medium">{patient.stage || "N/A"}</p>
                             </div>
                             <div>
                               <p className="text-muted-foreground">Contact</p>
-                              <p className="font-medium">{patient.contact}</p>
+                              <p className="font-medium">{patient.contact || "N/A"}</p>
                             </div>
                             <div>
-                              <p className="text-muted-foreground">Last Visit</p>
-                              <p className="font-medium">{new Date(patient.lastVisit).toLocaleDateString()}</p>
+                              <p className="text-muted-foreground">Email</p>
+                              <p className="font-medium">{patient.email || "N/A"}</p>
                             </div>
                           </div>
                         </div>
@@ -251,6 +273,35 @@ const PatientManagement = () => {
               ))
             )}
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t mt-6">
+              <p className="text-sm text-muted-foreground">
+                Showing page {currentPage} of {totalPages}
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1 || loading}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages || loading}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

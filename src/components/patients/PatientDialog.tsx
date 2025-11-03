@@ -5,45 +5,55 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Patient } from "@/pages/PatientManagement";
+import { Patient, CreatePatientData } from "@/services/patientApi";
 
 interface PatientDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (patient: Omit<Patient, "id">) => void;
+  onSubmit: (patient: CreatePatientData) => void;
   patient?: Patient;
 }
 
 export function PatientDialog({ open, onOpenChange, onSubmit, patient }: PatientDialogProps) {
-  const [formData, setFormData] = useState<Omit<Patient, "id">>({
-    name: "",
-    age: 0,
+  const [formData, setFormData] = useState<CreatePatientData>({
+    first_name: "",
+    last_name: "",
+    date_of_birth: "",
     gender: "Female",
     contact: "",
     email: "",
     diagnosis: "",
     stage: "",
-    lastVisit: new Date().toISOString().split('T')[0],
     status: "Active",
-    medicalHistory: "",
+    medical_history: "",
   });
 
   useEffect(() => {
     if (patient) {
-      const { id, ...patientData } = patient;
-      setFormData(patientData);
+      setFormData({
+        first_name: patient.first_name,
+        last_name: patient.last_name,
+        date_of_birth: patient.date_of_birth,
+        gender: patient.gender,
+        contact: patient.contact || "",
+        email: patient.email || "",
+        diagnosis: patient.diagnosis || "",
+        stage: patient.stage || "",
+        status: patient.status || "Active",
+        medical_history: patient.medical_history || "",
+      });
     } else {
       setFormData({
-        name: "",
-        age: 0,
+        first_name: "",
+        last_name: "",
+        date_of_birth: "",
         gender: "Female",
         contact: "",
         email: "",
         diagnosis: "",
         stage: "",
-        lastVisit: new Date().toISOString().split('T')[0],
         status: "Active",
-        medicalHistory: "",
+        medical_history: "",
       });
     }
   }, [patient, open]);
@@ -66,27 +76,35 @@ export function PatientDialog({ open, onOpenChange, onSubmit, patient }: Patient
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name *</Label>
+              <Label htmlFor="first_name">First Name *</Label>
               <Input
-                id="name"
+                id="first_name"
                 required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="John Doe"
+                value={formData.first_name}
+                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                placeholder="John"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="age">Age *</Label>
+              <Label htmlFor="last_name">Last Name *</Label>
               <Input
-                id="age"
-                type="number"
+                id="last_name"
                 required
-                min="0"
-                max="150"
-                value={formData.age || ""}
-                onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value) || 0 })}
-                placeholder="45"
+                value={formData.last_name}
+                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                placeholder="Doe"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="date_of_birth">Date of Birth *</Label>
+              <Input
+                id="date_of_birth"
+                type="date"
+                required
+                value={formData.date_of_birth}
+                onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
               />
             </div>
 
@@ -108,22 +126,20 @@ export function PatientDialog({ open, onOpenChange, onSubmit, patient }: Patient
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="contact">Contact Number *</Label>
+              <Label htmlFor="contact">Contact Number</Label>
               <Input
                 id="contact"
-                required
                 value={formData.contact}
                 onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
                 placeholder="+1234567890"
               />
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="email">Email *</Label>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="patient@email.com"
@@ -131,10 +147,9 @@ export function PatientDialog({ open, onOpenChange, onSubmit, patient }: Patient
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="diagnosis">Diagnosis *</Label>
+              <Label htmlFor="diagnosis">Diagnosis</Label>
               <Input
                 id="diagnosis"
-                required
                 value={formData.diagnosis}
                 onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
                 placeholder="Breast Cancer"
@@ -142,7 +157,7 @@ export function PatientDialog({ open, onOpenChange, onSubmit, patient }: Patient
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="stage">Stage *</Label>
+              <Label htmlFor="stage">Stage</Label>
               <Select
                 value={formData.stage}
                 onValueChange={(value) => setFormData({ ...formData, stage: value })}
@@ -161,18 +176,7 @@ export function PatientDialog({ open, onOpenChange, onSubmit, patient }: Patient
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="lastVisit">Last Visit Date *</Label>
-              <Input
-                id="lastVisit"
-                type="date"
-                required
-                value={formData.lastVisit}
-                onChange={(e) => setFormData({ ...formData, lastVisit: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="status">Status *</Label>
+              <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
                 onValueChange={(value: Patient["status"]) => setFormData({ ...formData, status: value })}
@@ -190,11 +194,11 @@ export function PatientDialog({ open, onOpenChange, onSubmit, patient }: Patient
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="medicalHistory">Medical History</Label>
+              <Label htmlFor="medical_history">Medical History</Label>
               <Textarea
-                id="medicalHistory"
-                value={formData.medicalHistory}
-                onChange={(e) => setFormData({ ...formData, medicalHistory: e.target.value })}
+                id="medical_history"
+                value={formData.medical_history}
+                onChange={(e) => setFormData({ ...formData, medical_history: e.target.value })}
                 placeholder="Previous conditions, allergies, medications..."
                 rows={4}
               />
