@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+import { API_ENDPOINTS } from '@/config/api';
 
 export interface Patient {
   id: number;
@@ -47,7 +46,7 @@ export interface UpdatePatientData extends Partial<CreatePatientData> {}
  * @returns Paginated list of patients
  */
 export const listPatients = async (page: number = 1): Promise<PaginatedResponse> => {
-  const response = await axios.get(`${API_BASE_URL}/patients/`, {
+  const response = await axios.get(API_ENDPOINTS.patients, {
     params: { page }
   });
   return response.data;
@@ -61,7 +60,7 @@ export const listPatients = async (page: number = 1): Promise<PaginatedResponse>
  * @returns Created patient with 201 status
  */
 export const createPatient = async (patientData: CreatePatientData): Promise<Patient> => {
-  const response = await axios.post(`${API_BASE_URL}/patients/`, patientData);
+  const response = await axios.post(API_ENDPOINTS.patients, patientData);
   return response.data;
 };
 
@@ -72,7 +71,7 @@ export const createPatient = async (patientData: CreatePatientData): Promise<Pat
  * @returns Patient details
  */
 export const getPatient = async (id: number): Promise<Patient> => {
-  const response = await axios.get(`${API_BASE_URL}/patients/${id}/`);
+  const response = await axios.get(`${API_ENDPOINTS.patients}${id}/`);
   return response.data;
 };
 
@@ -84,7 +83,7 @@ export const getPatient = async (id: number): Promise<Patient> => {
  * @returns Updated patient
  */
 export const updatePatient = async (id: number, patientData: CreatePatientData): Promise<Patient> => {
-  const response = await axios.put(`${API_BASE_URL}/patients/${id}/`, patientData);
+  const response = await axios.put(`${API_ENDPOINTS.patients}${id}/`, patientData);
   return response.data;
 };
 
@@ -96,7 +95,7 @@ export const updatePatient = async (id: number, patientData: CreatePatientData):
  * @returns Updated patient
  */
 export const patchPatient = async (id: number, patientData: UpdatePatientData): Promise<Patient> => {
-  const response = await axios.patch(`${API_BASE_URL}/patients/${id}/`, patientData);
+  const response = await axios.patch(`${API_ENDPOINTS.patients}${id}/`, patientData);
   return response.data;
 };
 
@@ -107,5 +106,5 @@ export const patchPatient = async (id: number, patientData: UpdatePatientData): 
  * @returns 204 No Content on success
  */
 export const deletePatient = async (id: number): Promise<void> => {
-  await axios.delete(`${API_BASE_URL}/patients/${id}/`);
+  await axios.delete(`${API_ENDPOINTS.patients}${id}/`);
 };

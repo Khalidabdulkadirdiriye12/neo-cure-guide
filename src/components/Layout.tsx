@@ -29,10 +29,10 @@ export function Layout() {
                     </div>
                     <div>
                       <h1 className="text-xl md:text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                        AI Treatment Recommender
+                        Neural Nexus
                       </h1>
                       <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">
-                        Cancer Treatment Decision Support
+                        AI-Powered Cancer Treatment Platform
                       </p>
                     </div>
                   </motion.div>

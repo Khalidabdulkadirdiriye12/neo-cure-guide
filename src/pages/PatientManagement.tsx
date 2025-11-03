@@ -138,9 +138,9 @@ const PatientManagement = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
               Patient Management
             </h2>
             <p className="text-muted-foreground mt-2">
@@ -149,7 +149,7 @@ const PatientManagement = () => {
           </div>
           <Button 
             onClick={() => setIsAddDialogOpen(true)}
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
           >
             <UserPlus className="h-4 w-4" />
             Add Patient
@@ -159,17 +159,17 @@ const PatientManagement = () => {
 
       <Card className="shadow-medical">
         <CardHeader>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
                 Patient Records
               </CardTitle>
               <CardDescription>
-                {totalCount} total patients registered {totalPages > 1 && `• Page ${currentPage} of ${totalPages}`}
+                {totalCount} total patients {totalPages > 1 && `• Page ${currentPage} of ${totalPages}`}
               </CardDescription>
             </div>
-            <div className="relative w-full max-w-sm">
+            <div className="relative w-full lg:w-auto lg:max-w-sm">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search patients..."
@@ -203,12 +203,12 @@ const PatientManagement = () => {
                   transition={{ delay: index * 0.1 }}
                 >
                   <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-primary/50">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 space-y-3">
-                          <div className="flex items-start justify-between">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                        <div className="flex-1 space-y-3 w-full">
+                          <div className="flex flex-col sm:flex-row items-start justify-between gap-2">
                             <div>
-                              <h3 className="text-xl font-semibold">{patient.first_name} {patient.last_name}</h3>
+                              <h3 className="text-lg sm:text-xl font-semibold">{patient.first_name} {patient.last_name}</h3>
                               <p className="text-sm text-muted-foreground">
                                 {patient.date_of_birth} • {patient.gender}
                               </p>
@@ -220,10 +220,10 @@ const PatientManagement = () => {
                             )}
                           </div>
 
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-sm">
                             <div>
                               <p className="text-muted-foreground">Diagnosis</p>
-                              <p className="font-medium">{patient.diagnosis || "N/A"}</p>
+                              <p className="font-medium break-words">{patient.diagnosis || "N/A"}</p>
                             </div>
                             <div>
                               <p className="text-muted-foreground">Stage</p>
@@ -231,21 +231,21 @@ const PatientManagement = () => {
                             </div>
                             <div>
                               <p className="text-muted-foreground">Contact</p>
-                              <p className="font-medium">{patient.contact || "N/A"}</p>
+                              <p className="font-medium break-all">{patient.contact || "N/A"}</p>
                             </div>
                             <div>
                               <p className="text-muted-foreground">Email</p>
-                              <p className="font-medium">{patient.email || "N/A"}</p>
+                              <p className="font-medium break-all">{patient.email || "N/A"}</p>
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="flex sm:flex-col gap-2 w-full sm:w-auto">
                           <Button
                             variant="outline"
                             size="icon"
                             onClick={() => setViewingPatient(patient)}
-                            className="hover:bg-primary/10 hover:text-primary hover:border-primary"
+                            className="hover:bg-primary/10 hover:text-primary hover:border-primary flex-1 sm:flex-none"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -253,7 +253,7 @@ const PatientManagement = () => {
                             variant="outline"
                             size="icon"
                             onClick={() => setEditingPatient(patient)}
-                            className="hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-500"
+                            className="hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-500 flex-1 sm:flex-none"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -261,7 +261,7 @@ const PatientManagement = () => {
                             variant="outline"
                             size="icon"
                             onClick={() => setDeletingPatient(patient)}
-                            className="hover:bg-red-500/10 hover:text-red-600 hover:border-red-500"
+                            className="hover:bg-red-500/10 hover:text-red-600 hover:border-red-500 flex-1 sm:flex-none"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -276,16 +276,17 @@ const PatientManagement = () => {
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between pt-4 border-t mt-6">
-              <p className="text-sm text-muted-foreground">
-                Showing page {currentPage} of {totalPages}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t mt-6">
+              <p className="text-sm text-muted-foreground text-center sm:text-left">
+                Page {currentPage} of {totalPages}
               </p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1 || loading}
+                  className="flex-1 sm:flex-none"
                 >
                   <ChevronLeft className="h-4 w-4 mr-1" />
                   Previous
@@ -295,6 +296,7 @@ const PatientManagement = () => {
                   size="sm"
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages || loading}
+                  className="flex-1 sm:flex-none"
                 >
                   Next
                   <ChevronRight className="h-4 w-4 ml-1" />

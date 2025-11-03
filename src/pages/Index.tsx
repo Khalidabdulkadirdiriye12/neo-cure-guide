@@ -6,6 +6,7 @@ import { ResultsDisplay, PredictionResults } from "@/components/ResultsDisplay";
 import { LoadingAnimation } from "@/components/LoadingAnimation";
 import { ModelInsights } from "@/components/ModelInsights";
 import { useToast } from "@/hooks/use-toast";
+import { API_ENDPOINTS } from "@/config/api";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +19,7 @@ const Index = () => {
 
     try {
       const response = await axios.post<PredictionResults>(
-        "http://localhost:8000/predict/",
+        API_ENDPOINTS.predictor,
         data,
         {
           headers: {

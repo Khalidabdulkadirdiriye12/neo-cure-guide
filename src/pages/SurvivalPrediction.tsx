@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import axios from "axios";
+import { API_ENDPOINTS } from "@/config/api";
 
 interface SurvivalPrediction {
   prediction: string;
@@ -70,7 +71,7 @@ const SurvivalPrediction = () => {
       };
 
       const response = await axios.post<SurvivalPrediction>(
-        "http://localhost:8000/api/predict-survival/",
+        API_ENDPOINTS.survival,
         apiData
       );
       

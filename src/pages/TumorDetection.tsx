@@ -4,6 +4,7 @@ import { Upload, Image as ImageIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { API_ENDPOINTS } from "@/config/api";
 
 interface PredictionResult {
   prediction: string;
@@ -46,7 +47,7 @@ const TumorDetection = () => {
       const formData = new FormData();
       formData.append('image', selectedFile);
 
-      const response = await fetch('http://127.0.0.1:8000/api/image_predict/', {
+      const response = await fetch(API_ENDPOINTS.imagePredict, {
         method: 'POST',
         body: formData,
       });

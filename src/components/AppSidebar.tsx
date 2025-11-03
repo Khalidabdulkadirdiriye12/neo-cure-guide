@@ -1,5 +1,6 @@
 import { Activity, Image, Stethoscope, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { NeuralNexusLogo } from "@/components/NeuralNexusLogo";
 
 import {
   Sidebar,
@@ -11,6 +12,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   useSidebar,
+  SidebarHeader,
 } from "@/components/ui/sidebar";
 
 const items = [
@@ -25,6 +27,19 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
+      <SidebarHeader className="border-b p-4">
+        <div className="flex items-center gap-3">
+          <NeuralNexusLogo className={open ? "w-10 h-10" : "w-8 h-8"} />
+          {open && (
+            <div>
+              <h2 className="font-bold text-lg bg-gradient-primary bg-clip-text text-transparent">
+                Neural Nexus
+              </h2>
+              <p className="text-xs text-muted-foreground">AI Healthcare</p>
+            </div>
+          )}
+        </div>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>AI Tools</SidebarGroupLabel>
