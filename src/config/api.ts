@@ -6,6 +6,7 @@ export const API_ENDPOINTS = {
   login: `${API_BASE_URL}/api/auth/login/`,
   refreshToken: `${API_BASE_URL}/api/auth/login/refresh/`,
   passwordReset: `${API_BASE_URL}/api/auth/password-reset/`,
+  register: `${API_BASE_URL}/api/auth/register/`,
   
   // ML endpoints
   predictor: `${API_BASE_URL}/api/predictor/predict/`,

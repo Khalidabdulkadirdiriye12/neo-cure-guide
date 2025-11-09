@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import TumorDetection from "./pages/TumorDetection";
 import SurvivalPrediction from "./pages/SurvivalPrediction";
 import PatientManagement from "./pages/PatientManagement";
+import RegisterUser from "./pages/RegisterUser";
 import Login from "./pages/Login";
 import PasswordReset from "./pages/PasswordReset";
 import NotFound from "./pages/NotFound";
@@ -39,11 +40,12 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/tumor-detection" element={<TumorDetection />} />
               <Route path="/survival-prediction" element={<SurvivalPrediction />} />
+              <Route path="/patient-management" element={<PatientManagement />} />
               <Route 
-                path="/patient-management" 
+                path="/register-user" 
                 element={
                   <ProtectedRoute requireAdmin>
-                    <PatientManagement />
+                    <RegisterUser />
                   </ProtectedRoute>
                 } 
               />
