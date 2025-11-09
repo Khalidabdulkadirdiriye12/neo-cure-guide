@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lock, Mail, AlertCircle } from "lucide-react";
@@ -15,8 +15,15 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { user, login } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect to home when user logs in successfully
+  useEffect(() => {
+    if (user) {
+      navigate("/", { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,14 +32,13 @@ const Login = () => {
 
     try {
       await login(email, password);
-      navigate("/");
+      // Navigation will happen via useEffect when user state updates
     } catch (err: any) {
       setError(
         err.response?.data?.detail || 
         err.response?.data?.message || 
         "Invalid email or password. Please try again."
       );
-    } finally {
       setIsLoading(false);
     }
   };
