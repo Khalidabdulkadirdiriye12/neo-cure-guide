@@ -78,8 +78,16 @@ const UserManagement = () => {
       const response = await axios.get(API_ENDPOINTS.users, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUsers(response.data);
+      
+      // Handle different response structures (array or object with results)
+      const usersData = Array.isArray(response.data) 
+        ? response.data 
+        : response.data.results || [];
+      
+      setUsers(usersData);
     } catch (error) {
+      console.error("Error fetching users:", error);
+      setUsers([]); // Set empty array on error
       toast({
         title: "Error",
         description: "Failed to fetch users. Please try again.",
