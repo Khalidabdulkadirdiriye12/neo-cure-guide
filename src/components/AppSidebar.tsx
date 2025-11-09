@@ -1,4 +1,4 @@
-import { Activity, Image, Stethoscope, Users, UserPlus, KeyRound } from "lucide-react";
+import { Activity, Image, Stethoscope, Users, UserPlus, KeyRound, UserCog } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { NeuralNexusLogo } from "@/components/NeuralNexusLogo";
 import { useAuth } from "@/contexts/AuthContext";
@@ -25,7 +25,7 @@ const mainItems = [
 ];
 
 const adminItems = [
-  { title: "Register User", url: "/register-user", icon: UserPlus },
+  { title: "User Management", url: "/user-management", icon: UserCog },
 ];
 
 const footerItems = [

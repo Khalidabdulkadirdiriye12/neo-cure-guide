@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { PatientDialog } from "@/components/patients/PatientDialog";
 import { PatientDetailsDialog } from "@/components/patients/PatientDetailsDialog";
 import { DeletePatientDialog } from "@/components/patients/DeletePatientDialog";
@@ -30,6 +31,7 @@ const PatientManagement = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
 
   // Fetch patients on mount and when page changes
   useEffect(() => {
@@ -147,13 +149,15 @@ const PatientManagement = () => {
               Manage patient records, medical history, and treatment plans
             </p>
           </div>
-          <Button 
-            onClick={() => setIsAddDialogOpen(true)}
-            className="gap-2 w-full sm:w-auto"
-          >
-            <UserPlus className="h-4 w-4" />
-            Add Patient
-          </Button>
+          {!isAdmin && (
+            <Button 
+              onClick={() => setIsAddDialogOpen(true)}
+              className="gap-2 w-full sm:w-auto"
+            >
+              <UserPlus className="h-4 w-4" />
+              Add Patient
+            </Button>
+          )}
         </div>
       </motion.div>
 
@@ -249,22 +253,26 @@ const PatientManagement = () => {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setEditingPatient(patient)}
-                            className="hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-500 flex-1 sm:flex-none"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setDeletingPatient(patient)}
-                            className="hover:bg-red-500/10 hover:text-red-600 hover:border-red-500 flex-1 sm:flex-none"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          {!isAdmin && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setEditingPatient(patient)}
+                                className="hover:bg-blue-500/10 hover:text-blue-600 hover:border-blue-500 flex-1 sm:flex-none"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setDeletingPatient(patient)}
+                                className="hover:bg-red-500/10 hover:text-red-600 hover:border-red-500 flex-1 sm:flex-none"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </div>
                     </CardContent>

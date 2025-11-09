@@ -15,4 +15,7 @@ export const API_ENDPOINTS = {
   
   // Patient management
   patients: `${API_BASE_URL}/api/patients/`,
+  
+  // User management (admin only)
+  users: `${API_BASE_URL}/api/auth/users/`,
 };

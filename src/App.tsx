@@ -11,6 +11,7 @@ import TumorDetection from "./pages/TumorDetection";
 import SurvivalPrediction from "./pages/SurvivalPrediction";
 import PatientManagement from "./pages/PatientManagement";
 import RegisterUser from "./pages/RegisterUser";
+import UserManagement from "./pages/UserManagement";
 import Login from "./pages/Login";
 import PasswordReset from "./pages/PasswordReset";
 import NotFound from "./pages/NotFound";
@@ -46,6 +47,14 @@ const App = () => (
                 element={
                   <ProtectedRoute requireAdmin>
                     <RegisterUser />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/user-management" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <UserManagement />
                   </ProtectedRoute>
                 } 
               />
