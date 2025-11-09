@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import axios from "axios";
 import { API_ENDPOINTS } from "@/config/api";
+import { jwtDecode } from "jwt-decode";
 
 interface User {
   id: string;
@@ -72,12 +73,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const initAuth = async () => {
       const accessToken = localStorage.getItem("accessToken");
-      const storedUser = localStorage.getItem("user");
 
-      if (accessToken && storedUser) {
+      if (accessToken) {
         try {
-          setUser(JSON.parse(storedUser));
-          // Set default auth header
+          // Decode token to get user data
+          const decodedToken: any = jwtDecode(accessToken);
+          
+          const userData: User = {
+            id: decodedToken.user_id || decodedToken.id,
+            email: decodedToken.email,
+            role: decodedToken.role || "doctor",
+            name: decodedToken.email?.split('@')[0],
+          };
+          
+          setUser(userData);
           axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
         } catch (error) {
           console.error("Error restoring session:", error);
@@ -96,24 +105,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password,
     });
 
-    console.log("Login response:", response.data);
-
-    // Handle different possible response structures from Django
     const responseData = response.data;
     const access = responseData.access || responseData.access_token;
     const refresh = responseData.refresh || responseData.refresh_token;
-    
-    // User data might be nested or at root level
-    const userData = responseData.user || {
-      id: responseData.id || responseData.user_id,
-      email: responseData.email || email,
-      role: responseData.role || "doctor",
-      name: responseData.name || responseData.username || responseData.first_name,
-    };
 
     if (!access || !refresh) {
       throw new Error("Invalid response: missing tokens");
     }
+
+    // Decode JWT token to get user data including role
+    const decodedToken: any = jwtDecode(access);
+    
+    const userData: User = {
+      id: decodedToken.user_id || decodedToken.id,
+      email: decodedToken.email || email,
+      role: decodedToken.role || "doctor",
+      name: responseData.name || responseData.first_name || decodedToken.email?.split('@')[0],
+    };
 
     localStorage.setItem("accessToken", access);
     localStorage.setItem("refreshToken", refresh);
