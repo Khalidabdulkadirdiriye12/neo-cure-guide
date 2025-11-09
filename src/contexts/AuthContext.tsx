@@ -96,7 +96,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password,
     });
 
-    const { access, refresh, user: userData } = response.data;
+    console.log("Login response:", response.data);
+
+    // Handle different possible response structures from Django
+    const responseData = response.data;
+    const access = responseData.access || responseData.access_token;
+    const refresh = responseData.refresh || responseData.refresh_token;
+    
+    // User data might be nested or at root level
+    const userData = responseData.user || {
+      id: responseData.id || responseData.user_id,
+      email: responseData.email || email,
+      role: responseData.role || "doctor",
+      name: responseData.name || responseData.username || responseData.first_name,
+    };
+
+    if (!access || !refresh) {
+      throw new Error("Invalid response: missing tokens");
+    }
 
     localStorage.setItem("accessToken", access);
     localStorage.setItem("refreshToken", refresh);
