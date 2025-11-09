@@ -1,6 +1,7 @@
 import { Activity, Image, Stethoscope, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { NeuralNexusLogo } from "@/components/NeuralNexusLogo";
+import { useAuth } from "@/contexts/AuthContext";
 
 import {
   Sidebar,
@@ -16,14 +17,18 @@ import {
 } from "@/components/ui/sidebar";
 
 const items = [
-  { title: "Treatment Recommender", url: "/", icon: Stethoscope },
-  { title: "Tumor Detection", url: "/tumor-detection", icon: Image },
-  { title: "Survival Prediction", url: "/survival-prediction", icon: Activity },
-  { title: "Patient Management", url: "/patient-management", icon: Users },
+  { title: "Treatment Recommender", url: "/", icon: Stethoscope, requireAdmin: false },
+  { title: "Tumor Detection", url: "/tumor-detection", icon: Image, requireAdmin: false },
+  { title: "Survival Prediction", url: "/survival-prediction", icon: Activity, requireAdmin: false },
+  { title: "Patient Management", url: "/patient-management", icon: Users, requireAdmin: true },
 ];
 
 export function AppSidebar() {
   const { open } = useSidebar();
+  const { isAdmin } = useAuth();
+
+  // Filter items based on user role
+  const visibleItems = items.filter(item => !item.requireAdmin || isAdmin);
 
   return (
     <Sidebar collapsible="icon">
@@ -45,7 +50,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>AI Tools</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {visibleItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink 
