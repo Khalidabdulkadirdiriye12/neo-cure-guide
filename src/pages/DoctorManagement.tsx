@@ -45,14 +45,24 @@ interface Doctor {
 }
 
 interface DoctorFormData {
+  user_id: number | null;
   specialization: string;
   hospital: string;
   contact: string;
   bio: string;
 }
 
+interface User {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+}
+
 const DoctorManagement = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -60,6 +70,7 @@ const DoctorManagement = () => {
   const [viewingDoctor, setViewingDoctor] = useState<Doctor | null>(null);
   const [deletingDoctor, setDeletingDoctor] = useState<Doctor | null>(null);
   const [formData, setFormData] = useState<DoctorFormData>({
+    user_id: null,
     specialization: "",
     hospital: "",
     contact: "",
@@ -70,7 +81,10 @@ const DoctorManagement = () => {
 
   useEffect(() => {
     fetchDoctors();
-  }, []);
+    if (isAdmin) {
+      fetchUsers();
+    }
+  }, [isAdmin]);
 
   const fetchDoctors = async () => {
     try {
@@ -95,6 +109,24 @@ const DoctorManagement = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await axios.get(API_ENDPOINTS.users, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      const usersData = Array.isArray(response.data) 
+        ? response.data 
+        : response.data.results || [];
+      
+      setUsers(usersData);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setUsers([]);
     }
   };
 
@@ -167,6 +199,7 @@ const DoctorManagement = () => {
 
   const resetForm = () => {
     setFormData({
+      user_id: null,
       specialization: "",
       hospital: "",
       contact: "",
@@ -177,6 +210,7 @@ const DoctorManagement = () => {
   const openEditDialog = (doctor: Doctor) => {
     setEditingDoctor(doctor);
     setFormData({
+      user_id: doctor.user.id,
       specialization: doctor.specialization,
       hospital: doctor.hospital,
       contact: doctor.contact,
@@ -399,6 +433,27 @@ const DoctorManagement = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
+            {!editingDoctor && (
+              <div className="space-y-2">
+                <Label htmlFor="user">User</Label>
+                <select
+                  id="user"
+                  value={formData.user_id || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, user_id: parseInt(e.target.value) })
+                  }
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  required
+                >
+                  <option value="">Select a user</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.first_name} {user.last_name} ({user.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="specialization">Specialization</Label>
               <Input

@@ -35,7 +35,7 @@ const footerItems = [
 
 export function AppSidebar() {
   const { open } = useSidebar();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isDoctor } = useAuth();
 
   return (
     <Sidebar collapsible="icon">
@@ -57,21 +57,28 @@ export function AppSidebar() {
           <SidebarGroupLabel>AI Tools</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink 
-                      to={item.url}
-                      className={({ isActive }) =>
-                        isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : ""
-                      }
-                    >
-                      <item.icon />
-                      {open && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {mainItems.map((item) => {
+                // Hide Doctor Management from doctors
+                if (item.url === "/doctor-management" && isDoctor && !isAdmin) {
+                  return null;
+                }
+                
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild tooltip={item.title}>
+                      <NavLink 
+                        to={item.url}
+                        className={({ isActive }) =>
+                          isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : ""
+                        }
+                      >
+                        <item.icon />
+                        {open && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
