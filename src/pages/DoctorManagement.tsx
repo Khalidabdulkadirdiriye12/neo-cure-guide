@@ -295,62 +295,134 @@ const DoctorManagement = () => {
               <p className="text-muted-foreground">Loading doctors...</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Specialization</TableHead>
-                  <TableHead>Hospital</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Desktop Table */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Specialization</TableHead>
+                      <TableHead>Hospital</TableHead>
+                      <TableHead>Contact</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredDoctors.map((doctor) => (
+                      <TableRow key={doctor.id}>
+                        <TableCell className="font-medium">
+                          {doctor.user.first_name} {doctor.user.last_name}
+                        </TableCell>
+                        <TableCell>{doctor.user.email}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">{doctor.specialization}</Badge>
+                        </TableCell>
+                        <TableCell>{doctor.hospital}</TableCell>
+                        <TableCell>{doctor.contact}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => setViewingDoctor(doctor)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            {isAdmin && (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => openEditDialog(doctor)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => setDeletingDoctor(doctor)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="md:hidden space-y-4">
                 {filteredDoctors.map((doctor) => (
-                  <TableRow key={doctor.id}>
-                    <TableCell className="font-medium">
-                      {doctor.user.first_name} {doctor.user.last_name}
-                    </TableCell>
-                    <TableCell>{doctor.user.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{doctor.specialization}</Badge>
-                    </TableCell>
-                    <TableCell>{doctor.hospital}</TableCell>
-                    <TableCell>{doctor.contact}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => setViewingDoctor(doctor)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        {isAdmin && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => openEditDialog(doctor)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => setDeletingDoctor(doctor)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
+                  <Card key={doctor.id}>
+                    <CardContent className="pt-6">
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Name</p>
+                          <p className="font-medium">
+                            {doctor.user.first_name} {doctor.user.last_name}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Email</p>
+                          <p className="text-sm">{doctor.user.email}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Specialization</p>
+                          <Badge variant="secondary">{doctor.specialization}</Badge>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Hospital</p>
+                          <p className="text-sm">{doctor.hospital}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Contact</p>
+                          <p className="text-sm">{doctor.contact}</p>
+                        </div>
+                        <div className="flex gap-2 pt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setViewingDoctor(doctor)}
+                            className="flex-1"
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            View
+                          </Button>
+                          {isAdmin && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openEditDialog(doctor)}
+                                className="flex-1"
+                              >
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setDeletingDoctor(doctor)}
+                                className="flex-1"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                    </CardContent>
+                  </Card>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
@@ -447,10 +519,13 @@ const DoctorManagement = () => {
                 >
                   <option value="">Select a user</option>
                   {users
-                    .filter((user) => !doctors.some((doctor) => doctor.user.id === user.id))
+                    .filter((user) => 
+                      user.role === 'doctor' && 
+                      !doctors.some((doctor) => doctor.user.id === user.id)
+                    )
                     .map((user) => (
                       <option key={user.id} value={user.id}>
-                        {user.first_name} {user.last_name} ({user.email}) - {user.role}
+                        {user.first_name} {user.last_name} ({user.email})
                       </option>
                     ))}
                 </select>
