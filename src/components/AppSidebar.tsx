@@ -63,6 +63,12 @@ export function AppSidebar() {
                   return null;
                 }
                 
+                // Hide prediction tools from admins (only doctors can predict)
+                const predictionTools = ["/", "/tumor-detection", "/survival-prediction"];
+                if (predictionTools.includes(item.url) && isAdmin && !isDoctor) {
+                  return null;
+                }
+                
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild tooltip={item.title}>

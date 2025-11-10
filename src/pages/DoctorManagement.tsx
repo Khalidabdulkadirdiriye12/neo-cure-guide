@@ -338,6 +338,7 @@ const DoctorManagement = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Profile</TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Specialization</TableHead>
@@ -349,6 +350,19 @@ const DoctorManagement = () => {
                   <TableBody>
                     {filteredDoctors.map((doctor) => (
                       <TableRow key={doctor.id}>
+                        <TableCell>
+                          {doctor.profile_image ? (
+                            <img 
+                              src={doctor.profile_image} 
+                              alt={`${doctor.user.first_name}'s profile`}
+                              className="h-10 w-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                              <Stethoscope className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell className="font-medium">
                           {doctor.user.first_name} {doctor.user.last_name}
                         </TableCell>
@@ -399,6 +413,15 @@ const DoctorManagement = () => {
                   <Card key={doctor.id}>
                     <CardContent className="pt-6">
                       <div className="space-y-3">
+                        {doctor.profile_image && (
+                          <div className="flex justify-center mb-4">
+                            <img 
+                              src={doctor.profile_image} 
+                              alt={`${doctor.user.first_name}'s profile`}
+                              className="h-20 w-20 rounded-full object-cover"
+                            />
+                          </div>
+                        )}
                         <div>
                           <p className="text-sm text-muted-foreground">Name</p>
                           <p className="font-medium">
