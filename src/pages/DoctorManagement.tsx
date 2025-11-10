@@ -50,6 +50,7 @@ interface DoctorFormData {
   hospital: string;
   contact: string;
   bio: string;
+  profile_image?: File | null;
 }
 
 interface User {
@@ -75,6 +76,7 @@ const DoctorManagement = () => {
     hospital: "",
     contact: "",
     bio: "",
+    profile_image: null,
   });
   const { toast } = useToast();
   const { isAdmin, user } = useAuth();
@@ -119,9 +121,14 @@ const DoctorManagement = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       
+      console.log("Users API Response:", response.data);
+      
       const usersData = Array.isArray(response.data) 
         ? response.data 
         : response.data.results || [];
+      
+      console.log("Parsed users data:", usersData);
+      console.log("Doctor role users:", usersData.filter((u: User) => u.role === 'doctor'));
       
       setUsers(usersData);
     } catch (error) {
@@ -133,8 +140,23 @@ const DoctorManagement = () => {
   const handleAddDoctor = async () => {
     try {
       const token = localStorage.getItem("accessToken");
-      await axios.post(API_ENDPOINTS.doctors, formData, {
-        headers: { Authorization: `Bearer ${token}` },
+      const formDataToSend = new FormData();
+      
+      formDataToSend.append('user', String(formData.user));
+      formDataToSend.append('specialization', formData.specialization);
+      formDataToSend.append('hospital', formData.hospital);
+      formDataToSend.append('contact', formData.contact);
+      formDataToSend.append('bio', formData.bio);
+      
+      if (formData.profile_image) {
+        formDataToSend.append('profile_image', formData.profile_image);
+      }
+      
+      await axios.post(API_ENDPOINTS.doctors, formDataToSend, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
       });
       toast({
         title: "Doctor Added",
@@ -156,8 +178,22 @@ const DoctorManagement = () => {
     if (!editingDoctor) return;
     try {
       const token = localStorage.getItem("accessToken");
-      await axios.patch(`${API_ENDPOINTS.doctors}${editingDoctor.id}/`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
+      const formDataToSend = new FormData();
+      
+      formDataToSend.append('specialization', formData.specialization);
+      formDataToSend.append('hospital', formData.hospital);
+      formDataToSend.append('contact', formData.contact);
+      formDataToSend.append('bio', formData.bio);
+      
+      if (formData.profile_image) {
+        formDataToSend.append('profile_image', formData.profile_image);
+      }
+      
+      await axios.patch(`${API_ENDPOINTS.doctors}${editingDoctor.id}/`, formDataToSend, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
       });
       toast({
         title: "Doctor Updated",
@@ -204,6 +240,7 @@ const DoctorManagement = () => {
       hospital: "",
       contact: "",
       bio: "",
+      profile_image: null,
     });
   };
 
@@ -507,7 +544,7 @@ const DoctorManagement = () => {
           <div className="space-y-4">
             {!editingDoctor && (
               <div className="space-y-2">
-                <Label htmlFor="user">User</Label>
+                <Label htmlFor="user">User (Doctor Role Only)</Label>
                 <select
                   id="user"
                   value={formData.user || ""}
@@ -519,18 +556,34 @@ const DoctorManagement = () => {
                 >
                   <option value="">Select a user</option>
                   {users
-                    .filter((user) => 
-                      user.role === 'doctor' && 
-                      !doctors.some((doctor) => doctor.user.id === user.id)
-                    )
+                    .filter((user) => {
+                      const isDoctor = user.role?.toLowerCase() === 'doctor';
+                      const hasProfile = doctors.some((doctor) => doctor.user.id === user.id);
+                      return isDoctor && !hasProfile;
+                    })
                     .map((user) => (
                       <option key={user.id} value={user.id}>
-                        {user.first_name} {user.last_name} ({user.email})
+                        {user.first_name || 'No name'} {user.last_name || ''} ({user.email})
                       </option>
                     ))}
                 </select>
+                {users.filter((user) => user.role?.toLowerCase() === 'doctor' && !doctors.some((doctor) => doctor.user.id === user.id)).length === 0 && (
+                  <p className="text-sm text-muted-foreground">No doctor role users available. Please create a user with doctor role first.</p>
+                )}
               </div>
             )}
+            <div className="space-y-2">
+              <Label htmlFor="profile_image">Profile Image</Label>
+              <Input
+                id="profile_image"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setFormData({ ...formData, profile_image: file });
+                }}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="specialization">Specialization</Label>
               <Input
