@@ -22,6 +22,7 @@ const mainItems = [
   { title: "Tumor Detection", url: "/tumor-detection", icon: Image },
   { title: "Survival Prediction", url: "/survival-prediction", icon: Activity },
   { title: "Patient Management", url: "/patient-management", icon: Users },
+  { title: "Doctor Management", url: "/doctor-management", icon: UserPlus },
 ];
 
 const adminItems = [
