@@ -45,7 +45,7 @@ interface Doctor {
 }
 
 interface DoctorFormData {
-  user_id: number | null;
+  user: number | null;
   specialization: string;
   hospital: string;
   contact: string;
@@ -70,7 +70,7 @@ const DoctorManagement = () => {
   const [viewingDoctor, setViewingDoctor] = useState<Doctor | null>(null);
   const [deletingDoctor, setDeletingDoctor] = useState<Doctor | null>(null);
   const [formData, setFormData] = useState<DoctorFormData>({
-    user_id: null,
+    user: null,
     specialization: "",
     hospital: "",
     contact: "",
@@ -199,7 +199,7 @@ const DoctorManagement = () => {
 
   const resetForm = () => {
     setFormData({
-      user_id: null,
+      user: null,
       specialization: "",
       hospital: "",
       contact: "",
@@ -210,7 +210,7 @@ const DoctorManagement = () => {
   const openEditDialog = (doctor: Doctor) => {
     setEditingDoctor(doctor);
     setFormData({
-      user_id: doctor.user.id,
+      user: doctor.user.id,
       specialization: doctor.specialization,
       hospital: doctor.hospital,
       contact: doctor.contact,
@@ -438,19 +438,21 @@ const DoctorManagement = () => {
                 <Label htmlFor="user">User</Label>
                 <select
                   id="user"
-                  value={formData.user_id || ""}
+                  value={formData.user || ""}
                   onChange={(e) =>
-                    setFormData({ ...formData, user_id: parseInt(e.target.value) })
+                    setFormData({ ...formData, user: parseInt(e.target.value) })
                   }
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   required
                 >
                   <option value="">Select a user</option>
-                  {users.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.first_name} {user.last_name} ({user.email})
-                    </option>
-                  ))}
+                  {users
+                    .filter((user) => !doctors.some((doctor) => doctor.user.id === user.id))
+                    .map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.first_name} {user.last_name} ({user.email}) - {user.role}
+                      </option>
+                    ))}
                 </select>
               </div>
             )}
