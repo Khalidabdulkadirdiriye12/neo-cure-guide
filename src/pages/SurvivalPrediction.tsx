@@ -8,9 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import axios from "axios";
-import { API_ENDPOINTS } from "@/config/api";
 import { useAuth } from "@/contexts/AuthContext";
+import apiClient, { formatPredictionData } from "@/services/api";
 
 interface SurvivalPrediction {
   prediction: string;
@@ -36,10 +35,15 @@ const SurvivalPrediction = () => {
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const response = await axios.get(API_ENDPOINTS.patients);
+        const response = await apiClient.get('/api/patients/');
         setPatients(response.data.results || response.data);
       } catch (error) {
         console.error("Error fetching patients:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch patients. Please check your connection.",
+          variant: "destructive",
+        });
       }
     };
     fetchPatients();
@@ -106,8 +110,8 @@ const SurvivalPrediction = () => {
         atg12: parseFloat(formData.ATG12) || 0,
       };
 
-      const response = await axios.post<SurvivalPrediction>(
-        API_ENDPOINTS.survival,
+      const response = await apiClient.post<SurvivalPrediction>(
+        '/api/survival/predict-survival/',
         apiData
       );
       

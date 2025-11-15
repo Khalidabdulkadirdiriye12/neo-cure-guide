@@ -4,11 +4,10 @@ import { Upload, Image as ImageIcon, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { API_ENDPOINTS } from "@/config/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import axios from "axios";
+import apiClient from "@/services/api";
 
 interface PredictionResult {
   prediction: string;
@@ -35,10 +34,15 @@ const TumorDetection = () => {
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const response = await axios.get(API_ENDPOINTS.patients);
+        const response = await apiClient.get('/api/patients/');
         setPatients(response.data.results || response.data);
       } catch (error) {
         console.error("Error fetching patients:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch patients. Please check your connection.",
+          variant: "destructive",
+        });
       }
     };
     fetchPatients();
@@ -85,8 +89,12 @@ const TumorDetection = () => {
       formData.append('doctor_id', user?.id || '');
       formData.append('prediction_type', 'image');
 
-      const response = await fetch(API_ENDPOINTS.imagePredict, {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch('http://127.0.0.1:8000/api/image_predict/', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
         body: formData,
       });
 
