@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Activity, Heart } from "lucide-react";
+import { Activity, Heart, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,17 +10,40 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import axios from "axios";
 import { API_ENDPOINTS } from "@/config/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SurvivalPrediction {
   prediction: string;
   probability: number;
 }
 
+interface Patient {
+  id: number;
+  name: string;
+  age: number;
+  medical_record_number: string;
+}
+
 const SurvivalPrediction = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [prediction, setPrediction] = useState<SurvivalPrediction | null>(null);
   const [formData, setFormData] = useState<Record<string, string>>({});
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedPatientId, setSelectedPatientId] = useState<string>("");
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const response = await axios.get(API_ENDPOINTS.patients);
+        setPatients(response.data.results || response.data);
+      } catch (error) {
+        console.error("Error fetching patients:", error);
+      }
+    };
+    fetchPatients();
+  }, []);
 
   const handleInputChange = (id: string, value: string) => {
     setFormData(prev => ({ ...prev, [id]: value }));
@@ -28,12 +51,25 @@ const SurvivalPrediction = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!selectedPatientId) {
+      toast({
+        title: "Patient Required",
+        description: "Please select a patient before making a prediction.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setPrediction(null);
     
     try {
       // Transform form data to match Django serializer format
       const apiData = {
+        patient_id: parseInt(selectedPatientId),
+        doctor_id: user?.id,
+        prediction_type: "survival",
         age_at_diagnosis: parseFloat(formData.age) || 0,
         neoplasm_histologic_grade: parseFloat(formData.grade) || 0,
         her2_status: formData.her2 === "Positive" ? 1 : 0,
@@ -112,6 +148,35 @@ const SurvivalPrediction = () => {
           Predict patient survival outcomes based on clinical and genetic data
         </p>
       </motion.div>
+
+      <Card className="shadow-medical">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Patient Selection
+          </CardTitle>
+          <CardDescription>
+            Select a patient for this prediction
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="patient-select">Patient</Label>
+            <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
+              <SelectTrigger id="patient-select">
+                <SelectValue placeholder="Select a patient" />
+              </SelectTrigger>
+              <SelectContent>
+                {patients.map((patient) => (
+                  <SelectItem key={patient.id} value={patient.id.toString()}>
+                    {patient.name} (MRN: {patient.medical_record_number})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
       <form onSubmit={handleSubmit}>
         <Card className="shadow-medical">
