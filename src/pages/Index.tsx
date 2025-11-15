@@ -15,7 +15,8 @@ import apiClient, { formatPredictionData } from "@/services/api";
 
 interface Patient {
   id: number;
-  name: string;
+  first_name: string;
+  last_name: string;
   age: number;
   medical_record_number: string;
 }
@@ -112,7 +113,7 @@ const Index = () => {
                 <SelectContent>
                   {patients.map((patient) => (
                     <SelectItem key={patient.id} value={patient.id.toString()}>
-                      {patient.name} (MRN: {patient.medical_record_number})
+                      {patient.first_name} {patient.last_name} (MRN: {patient.medical_record_number})
                     </SelectItem>
                   ))}
                 </SelectContent>
