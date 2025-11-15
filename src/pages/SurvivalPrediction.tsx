@@ -70,11 +70,8 @@ const SurvivalPrediction = () => {
     setPrediction(null);
     
     try {
-      // Transform form data to match Django serializer format
-      const apiData = {
-        patient_id: parseInt(selectedPatientId),
-        doctor_id: user?.id,
-        prediction_type: "survival",
+      // Transform form data to match Django Prediction model format
+      const inputData = {
         age_at_diagnosis: parseFloat(formData.age) || 0,
         neoplasm_histologic_grade: parseFloat(formData.grade) || 0,
         her2_status: formData.her2 === "Positive" ? 1 : 0,
@@ -111,6 +108,13 @@ const SurvivalPrediction = () => {
         atg12: parseFloat(formData.ATG12) || 0,
       };
 
+      const apiData = {
+        patient_id: parseInt(selectedPatientId),
+        doctor_id: parseInt(user?.id || '0'),
+        prediction_type: 'survival',
+        input_data: inputData,
+      };
+
       const response = await apiClient.post<SurvivalPrediction>(
         '/api/survival/predict-survival/',
         apiData
@@ -119,12 +123,12 @@ const SurvivalPrediction = () => {
       setPrediction(response.data);
       toast({
         title: "Prediction Complete",
-        description: `Patient predicted as ${response.data.prediction} with ${(response.data.probability * 100).toFixed(1)}% probability`,
+        description: `Survival analysis saved: ${response.data.prediction} with ${(response.data.probability * 100).toFixed(1)}% probability`,
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to get prediction. Please try again.",
+        description: "Failed to save prediction. Please try again.",
         variant: "destructive",
       });
     } finally {
