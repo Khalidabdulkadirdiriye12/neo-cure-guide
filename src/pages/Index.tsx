@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { motion } from "framer-motion";
 import { PatientForm, PatientData } from "@/components/PatientForm";
 import { ResultsDisplay, PredictionResults } from "@/components/ResultsDisplay";
@@ -12,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Users } from "lucide-react";
+import apiClient, { formatPredictionData } from "@/services/api";
 
 interface Patient {
   id: number;
@@ -31,10 +31,15 @@ const Index = () => {
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const response = await axios.get(API_ENDPOINTS.patients);
+        const response = await apiClient.get('/api/patients/');
         setPatients(response.data.results || response.data);
       } catch (error) {
         console.error("Error fetching patients:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch patients. Please check your connection.",
+          variant: "destructive",
+        });
       }
     };
     fetchPatients();
@@ -54,19 +59,16 @@ const Index = () => {
     setResults(null);
 
     try {
-      const response = await axios.post<PredictionResults>(
-        API_ENDPOINTS.predictor,
-        {
-          ...data,
-          patient_id: parseInt(selectedPatientId),
-          doctor_id: user?.id,
-          prediction_type: "treatment"
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+      const predictionData = formatPredictionData({
+        ...data,
+        patient_id: selectedPatientId,
+        doctor_id: user?.id,
+        prediction_type: "treatment"
+      });
+
+      const response = await apiClient.post<PredictionResults>(
+        '/api/predictor/predict/',
+        predictionData
       );
 
       setResults(response.data);
