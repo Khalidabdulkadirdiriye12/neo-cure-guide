@@ -1,14 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Upload, Image as ImageIcon } from "lucide-react";
+import { Upload, Image as ImageIcon, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { API_ENDPOINTS } from "@/config/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import axios from "axios";
 
 interface PredictionResult {
   prediction: string;
   confidence: number;
+}
+
+interface Patient {
+  id: number;
+  name: string;
+  age: number;
+  medical_record_number: string;
 }
 
 const TumorDetection = () => {
@@ -16,7 +27,22 @@ const TumorDetection = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [prediction, setPrediction] = useState<PredictionResult | null>(null);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedPatientId, setSelectedPatientId] = useState<string>("");
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const response = await axios.get(API_ENDPOINTS.patients);
+        setPatients(response.data.results || response.data);
+      } catch (error) {
+        console.error("Error fetching patients:", error);
+      }
+    };
+    fetchPatients();
+  }, []);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -41,11 +67,23 @@ const TumorDetection = () => {
       return;
     }
 
+    if (!selectedPatientId) {
+      toast({
+        title: "Patient Required",
+        description: "Please select a patient before analyzing the image.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsAnalyzing(true);
     
     try {
       const formData = new FormData();
       formData.append('image', selectedFile);
+      formData.append('patient_id', selectedPatientId);
+      formData.append('doctor_id', user?.id || '');
+      formData.append('prediction_type', 'image');
 
       const response = await fetch(API_ENDPOINTS.imagePredict, {
         method: 'POST',
@@ -89,6 +127,35 @@ const TumorDetection = () => {
           Upload mammogram or histopathology images for AI-powered tumor detection
         </p>
       </motion.div>
+
+      <Card className="shadow-medical">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Patient Selection
+          </CardTitle>
+          <CardDescription>
+            Select a patient for this prediction
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="patient-select">Patient</Label>
+            <Select value={selectedPatientId} onValueChange={setSelectedPatientId}>
+              <SelectTrigger id="patient-select">
+                <SelectValue placeholder="Select a patient" />
+              </SelectTrigger>
+              <SelectContent>
+                {patients.map((patient) => (
+                  <SelectItem key={patient.id} value={patient.id.toString()}>
+                    {patient.name} (MRN: {patient.medical_record_number})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="shadow-medical">
         <CardHeader>
