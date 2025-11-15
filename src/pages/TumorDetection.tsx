@@ -108,7 +108,7 @@ const TumorDetection = () => {
       
       toast({
         title: "Analysis Complete",
-        description: `Prediction: ${data.prediction} (${(data.confidence * 100).toFixed(1)}% confidence)`,
+        description: `Image analysis saved: ${data.prediction} (${(data.confidence * 100).toFixed(1)}% confidence)`,
       });
     } catch (error) {
       console.error('Error analyzing image:', error);
