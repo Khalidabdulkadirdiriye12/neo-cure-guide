@@ -18,10 +18,10 @@ const Login = () => {
   const { user, login } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect to home when user logs in successfully
+  // Redirect to dashboard when user logs in successfully
   useEffect(() => {
     if (user) {
-      navigate("/", { replace: true });
+      navigate("/dashboard", { replace: true });
     }
   }, [user, navigate]);
 
