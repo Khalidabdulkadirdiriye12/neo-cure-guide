@@ -48,7 +48,7 @@ const PredictionsHistory = () => {
     try {
       setLoading(true);
       const response = await apiClient.get<PredictionsResponse>(
-        `/predictions/predictions/?page=${page}`
+        `/api/predictions/predictions/?page=${page}`
       );
       setPredictions(response.data.results);
       setTotalCount(response.data.count);
