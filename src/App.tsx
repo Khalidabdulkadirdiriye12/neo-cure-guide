@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Index from "./pages/Index";
 import TumorDetection from "./pages/TumorDetection";
 import SurvivalPrediction from "./pages/SurvivalPrediction";
+import PredictionsHistory from "./pages/PredictionsHistory";
 import PatientManagement from "./pages/PatientManagement";
 import DoctorManagement from "./pages/DoctorManagement";
 import UserManagement from "./pages/UserManagement";
@@ -50,6 +51,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/tumor-detection" element={<TumorDetection />} />
               <Route path="/survival-prediction" element={<SurvivalPrediction />} />
+              <Route path="/predictions-history" element={<PredictionsHistory />} />
               <Route path="/patient-management" element={<PatientManagement />} />
               <Route path="/doctor-management" element={<DoctorManagement />} />
               <Route
