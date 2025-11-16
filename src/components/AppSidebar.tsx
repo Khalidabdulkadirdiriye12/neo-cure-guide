@@ -1,4 +1,4 @@
-import { Activity, Image, Stethoscope, Users, UserPlus, KeyRound, UserCog } from "lucide-react";
+import { Activity, Image, Stethoscope, Users, UserPlus, KeyRound, UserCog, LayoutDashboard } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { NeuralNexusLogo } from "@/components/NeuralNexusLogo";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const mainItems = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Treatment Recommender", url: "/", icon: Stethoscope },
   { title: "Tumor Detection", url: "/tumor-detection", icon: Image },
   { title: "Survival Prediction", url: "/survival-prediction", icon: Activity },
@@ -63,9 +64,9 @@ export function AppSidebar() {
                   return null;
                 }
                 
-                // Hide prediction tools from admins (only doctors can predict)
-                const predictionTools = ["/", "/tumor-detection", "/survival-prediction"];
-                if (predictionTools.includes(item.url) && isAdmin && !isDoctor) {
+                // Hide prediction tools and dashboard from admins (only doctors can access)
+                const doctorOnlyTools = ["/", "/tumor-detection", "/survival-prediction", "/dashboard"];
+                if (doctorOnlyTools.includes(item.url) && isAdmin && !isDoctor) {
                   return null;
                 }
                 

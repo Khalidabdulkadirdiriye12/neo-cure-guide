@@ -5,10 +5,11 @@ import { LoadingAnimation } from "./LoadingAnimation";
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
+  requireDoctor?: boolean;
 }
 
-export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
-  const { user, isLoading, isAdmin } = useAuth();
+export const ProtectedRoute = ({ children, requireAdmin = false, requireDoctor = false }: ProtectedRouteProps) => {
+  const { user, isLoading, isAdmin, isDoctor } = useAuth();
 
   if (isLoading) {
     return (
@@ -24,6 +25,10 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
 
   if (requireAdmin && !isAdmin) {
     return <Navigate to="/" replace />;
+  }
+
+  if (requireDoctor && !isDoctor) {
+    return <Navigate to="/patient-management" replace />;
   }
 
   return <>{children}</>;

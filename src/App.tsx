@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
+import Dashboard from "./pages/Dashboard";
 import Index from "./pages/Index";
 import TumorDetection from "./pages/TumorDetection";
 import SurvivalPrediction from "./pages/SurvivalPrediction";
@@ -38,6 +39,14 @@ const App = () => (
             
             {/* Protected routes */}
             <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute requireDoctor>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
               <Route path="/" element={<Index />} />
               <Route path="/tumor-detection" element={<TumorDetection />} />
               <Route path="/survival-prediction" element={<SurvivalPrediction />} />
