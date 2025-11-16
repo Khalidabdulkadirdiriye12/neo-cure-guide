@@ -109,7 +109,6 @@ const SurvivalPrediction = () => {
       };
 
       const apiData = {
-        patient_id: parseInt(selectedPatientId),
         doctor_id: parseInt(user?.id || '0'),
         prediction_type: 'survival',
         input_data: inputData,
