@@ -1,38 +1,110 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Users, Activity, Image, TrendingUp } from "lucide-react";
+import apiClient from "@/services/api";
 
-// Mock data - will be replaced with real API data later
-const patientsByMonth = [
-  { month: "Jan", count: 12 },
-  { month: "Feb", count: 19 },
-  { month: "Mar", count: 15 },
-  { month: "Apr", count: 25 },
-  { month: "May", count: 22 },
-  { month: "Jun", count: 30 },
-];
-
-const predictionTypes = [
-  { name: "Treatment", value: 45, color: "hsl(var(--primary))" },
-  { name: "Survival", value: 30, color: "hsl(var(--secondary))" },
-  { name: "Image Analysis", value: 25, color: "hsl(var(--accent))" },
-];
-
-const survivalRates = [
-  { stage: "Stage I", rate: 92 },
-  { stage: "Stage II", rate: 78 },
-  { stage: "Stage III", rate: 54 },
-  { stage: "Stage IV", rate: 28 },
-];
-
-const recentActivity = [
-  { week: "Week 1", predictions: 8 },
-  { week: "Week 2", predictions: 12 },
-  { week: "Week 3", predictions: 15 },
-  { week: "Week 4", predictions: 18 },
-];
+interface DashboardStats {
+  totalPatients: number;
+  totalPredictions: number;
+  imageAnalyses: number;
+  survivalPredictions: number;
+  treatmentPredictions: number;
+}
 
 export default function Dashboard() {
+  const [stats, setStats] = useState<DashboardStats>({
+    totalPatients: 0,
+    totalPredictions: 0,
+    imageAnalyses: 0,
+    survivalPredictions: 0,
+    treatmentPredictions: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        // Fetch patients data
+        const patientsResponse = await apiClient.get('/api/patients/');
+        const patientsData = patientsResponse.data;
+
+        // Fetch predictions data
+        const predictionsResponse = await apiClient.get('/api/predictions/predictions/');
+        const predictionsData = predictionsResponse.data;
+
+        console.log('=== Dashboard Data ===');
+        console.log('Patients:', patientsData);
+        console.log('Predictions:', predictionsData);
+        console.log('======================');
+
+        // Count prediction types
+        const imagePredictions = predictionsData.results.filter(
+          (p: any) => p.prediction_type === 'image'
+        ).length;
+        const survivalPredictions = predictionsData.results.filter(
+          (p: any) => p.prediction_type === 'survival'
+        ).length;
+        const treatmentPredictions = predictionsData.results.filter(
+          (p: any) => p.prediction_type === 'treatment'
+        ).length;
+
+        setStats({
+          totalPatients: patientsData.count,
+          totalPredictions: predictionsData.count,
+          imageAnalyses: imagePredictions,
+          survivalPredictions: survivalPredictions,
+          treatmentPredictions: treatmentPredictions,
+        });
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  // Prepare chart data
+  const predictionTypesChart = [
+    { name: "Treatment", value: stats.treatmentPredictions, color: "hsl(var(--primary))" },
+    { name: "Survival", value: stats.survivalPredictions, color: "hsl(var(--secondary))" },
+    { name: "Image Analysis", value: stats.imageAnalyses, color: "hsl(var(--accent))" },
+  ];
+
+  const survivalRates = [
+    { stage: "Stage I", rate: 92 },
+    { stage: "Stage II", rate: 78 },
+    { stage: "Stage III", rate: 54 },
+    { stage: "Stage IV", rate: 28 },
+  ];
+
+  const patientsByMonth = [
+    { month: "Jan", count: 12 },
+    { month: "Feb", count: 19 },
+    { month: "Mar", count: 15 },
+    { month: "Apr", count: 25 },
+    { month: "May", count: 22 },
+    { month: "Jun", count: 30 },
+  ];
+
+  const recentActivity = [
+    { week: "Week 1", predictions: 8 },
+    { week: "Week 2", predictions: 12 },
+    { week: "Week 3", predictions: 15 },
+    { week: "Week 4", predictions: 18 },
+  ];
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center h-64">
+          <p className="text-muted-foreground">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
@@ -50,9 +122,9 @@ export default function Dashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">123</div>
+            <div className="text-2xl font-bold">{stats.totalPatients}</div>
             <p className="text-xs text-muted-foreground">
-              +12% from last month
+              Active patients in system
             </p>
           </CardContent>
         </Card>
@@ -63,9 +135,9 @@ export default function Dashboard() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">567</div>
+            <div className="text-2xl font-bold">{stats.totalPredictions}</div>
             <p className="text-xs text-muted-foreground">
-              +23% from last month
+              Total predictions recorded
             </p>
           </CardContent>
         </Card>
@@ -76,22 +148,22 @@ export default function Dashboard() {
             <Image className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">89</div>
+            <div className="text-2xl font-bold">{stats.imageAnalyses}</div>
             <p className="text-xs text-muted-foreground">
-              +8% from last month
+              Tumor detection scans
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Survival Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">Survival Predictions</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">63%</div>
+            <div className="text-2xl font-bold">{stats.survivalPredictions}</div>
             <p className="text-xs text-muted-foreground">
-              +2% from last month
+              Survival analyses completed
             </p>
           </CardContent>
         </Card>
@@ -138,7 +210,7 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={predictionTypes}
+                  data={predictionTypesChart}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -147,7 +219,7 @@ export default function Dashboard() {
                   fill="hsl(var(--primary))"
                   dataKey="value"
                 >
-                  {predictionTypes.map((entry, index) => (
+                  {predictionTypesChart.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
