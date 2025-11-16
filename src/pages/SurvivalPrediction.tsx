@@ -70,19 +70,20 @@ const SurvivalPrediction = () => {
     setPrediction(null);
     
     try {
-      // Transform form data to match Django Prediction model format
-      const inputData = {
+      // Prepare data in the exact format expected by backend
+      const predictionData = {
+        patient_id: parseInt(selectedPatientId),
         age_at_diagnosis: parseFloat(formData.age) || 0,
         neoplasm_histologic_grade: parseFloat(formData.grade) || 0,
-        her2_status: formData.her2 === "Positive" ? 1 : 0,
-        er_status: formData.er === "Positive" ? 1 : 0,
-        pr_status: formData.pr === "Positive" ? 1 : 0,
+        her2_status: formData.her2 || "Negative",
+        er_status: formData.er || "Negative",
+        pr_status: formData.pr || "Negative",
         tumor_size: parseFloat(formData.tumor_size) || 0,
         tumor_stage: parseFloat(formData.tumor_stage) || 0,
         lymph_nodes_examined_positive: parseFloat(formData.lymph_nodes) || 0,
         mutation_count: parseFloat(formData.mutation_count) || 0,
         nottingham_prognostic_index: parseFloat(formData.npi) || 0,
-        inferred_menopausal_state: formData.menopausal === "Post" ? 1 : 0,
+        inferred_menopausal_state: formData.menopausal || "Post",
         overall_survival_months: parseFloat(formData.overall_survival) || 0,
         relapse_free_status_months: parseFloat(formData.relapse_free) || 0,
         tmb_nonsynonymous: parseFloat(formData.tmb) || 0,
@@ -108,26 +109,37 @@ const SurvivalPrediction = () => {
         atg12: parseFloat(formData.ATG12) || 0,
       };
 
-      const apiData = {
-        doctor_id: parseInt(user?.id || '0'),
-        prediction_type: 'survival',
-        input_data: inputData,
-      };
+      // Log the data being sent to backend
+      console.log('=== Survival Prediction Data ===');
+      console.log('Data being sent to backend:', JSON.stringify(predictionData, null, 2));
+      console.log('================================');
 
-      const response = await apiClient.post<SurvivalPrediction>(
-        '/api/survival/predict-survival/',
-        apiData
-      );
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch('http://127.0.0.1:8000/api/survival/predict-survival/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(predictionData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get survival prediction');
+      }
+
+      const data = await response.json();
+      setPrediction(data);
       
-      setPrediction(response.data);
       toast({
         title: "Prediction Complete",
-        description: `Survival analysis saved: ${response.data.prediction} with ${(response.data.probability * 100).toFixed(1)}% probability`,
+        description: `Survival prediction saved: ${data.prediction} (${(data.probability * 100).toFixed(1)}% probability)`,
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error making prediction:', error);
       toast({
-        title: "Error",
-        description: "Failed to save prediction. Please try again.",
+        title: "Prediction Failed",
+        description: "Failed to connect to the backend. Please ensure the server is running.",
         variant: "destructive",
       });
     } finally {
