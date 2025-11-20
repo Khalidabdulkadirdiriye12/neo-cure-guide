@@ -28,18 +28,31 @@ export default function AdminDashboard() {
   const fetchAdminStats = async () => {
     try {
       setLoading(true);
-      const [usersRes, doctorsRes, patientsRes, predictionsRes] = await Promise.all([
-        apiClient.get("/api/auth/users/"),
-        apiClient.get("/api/doctors/"),
-        apiClient.get("/api/patients/"),
-        apiClient.get("/api/predictions/predictions/"),
+      
+      // Fetch data that admins have access to
+      const [usersRes, doctorsRes, patientsRes] = await Promise.all([
+        apiClient.get("/api/auth/users/").catch(() => ({ data: { count: 0 } })),
+        apiClient.get("/api/doctors/").catch(() => ({ data: { count: 0 } })),
+        apiClient.get("/api/patients/").catch(() => ({ data: { count: 0 } })),
       ]);
 
+      // Try to fetch predictions, but handle 403 gracefully (admins might not have access)
+      let predictionsCount = 0;
+      try {
+        const predictionsRes = await apiClient.get("/api/predictions/predictions/");
+        predictionsCount = predictionsRes.data.count || 0;
+      } catch (error: any) {
+        // If 403, admins don't have access to predictions
+        if (error.response?.status !== 403) {
+          console.error("Error fetching predictions:", error);
+        }
+      }
+
       setStats({
-        totalUsers: usersRes.data.count || usersRes.data.length || 0,
-        totalDoctors: doctorsRes.data.count || doctorsRes.data.length || 0,
+        totalUsers: usersRes.data.count || usersRes.data.results?.length || 0,
+        totalDoctors: doctorsRes.data.count || doctorsRes.data.results?.length || 0,
         totalPatients: patientsRes.data.count || 0,
-        totalPredictions: predictionsRes.data.count || 0,
+        totalPredictions: predictionsCount,
       });
     } catch (error) {
       console.error("Error fetching admin stats:", error);
