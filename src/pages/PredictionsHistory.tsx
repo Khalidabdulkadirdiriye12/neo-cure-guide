@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Activity, Image as ImageIcon, Stethoscope, User, Calendar, ChevronLeft, ChevronRight, Download, FileDown, FileText } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Activity, Image as ImageIcon, Stethoscope, User, Calendar, ChevronLeft, ChevronRight, Download, FileDown, FileText, TrendingUp, Clock } from "lucide-react";
 import apiClient from "@/services/api";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -44,6 +45,7 @@ const PredictionsHistory = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   const [hasPrevious, setHasPrevious] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("all");
   const { toast } = useToast();
 
   const fetchPredictions = async (page: number = 1) => {
@@ -259,6 +261,19 @@ const PredictionsHistory = () => {
     }
   };
 
+  const filteredPredictions = activeTab === "all" 
+    ? predictions 
+    : predictions.filter(p => p.prediction_type === activeTab);
+
+  const getStats = () => {
+    const treatment = predictions.filter(p => p.prediction_type === "treatment").length;
+    const survival = predictions.filter(p => p.prediction_type === "survival").length;
+    const image = predictions.filter(p => p.prediction_type === "image").length;
+    return { treatment, survival, image };
+  };
+
+  const stats = getStats();
+
   if (loading) {
     return (
       <div className="container mx-auto p-6 space-y-6">
@@ -279,144 +294,231 @@ const PredictionsHistory = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        className="space-y-6"
       >
-        <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+        {/* Header Section */}
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              Predictions History
+            <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              Reports & Analytics
             </h1>
             <p className="text-muted-foreground mt-2">
-              View all AI predictions made across the platform ({totalCount} total)
+              View and export AI predictions across the platform
             </p>
           </div>
           <div className="flex gap-2">
             <Button
               variant="outline"
-              onClick={() => exportToCSV(predictions)}
-              disabled={predictions.length === 0}
+              onClick={() => exportToCSV(filteredPredictions)}
+              disabled={filteredPredictions.length === 0}
+              className="gap-2"
             >
-              <FileText className="h-4 w-4 mr-2" />
+              <FileText className="h-4 w-4" />
               Export CSV
             </Button>
             <Button
               variant="outline"
-              onClick={() => exportToJSON(predictions)}
-              disabled={predictions.length === 0}
+              onClick={() => exportToJSON(filteredPredictions)}
+              disabled={filteredPredictions.length === 0}
+              className="gap-2"
             >
-              <FileDown className="h-4 w-4 mr-2" />
+              <FileDown className="h-4 w-4" />
               Export JSON
             </Button>
           </div>
         </div>
 
-        <div className="grid gap-4">
-          {predictions.map((prediction) => (
-            <motion.div
-              key={prediction.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                        {getPredictionIcon(prediction.prediction_type)}
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">
-                          {getPredictionBadge(prediction.prediction_type)}
-                        </CardTitle>
-                        <CardDescription className="flex items-center gap-2 mt-1">
-                          <Calendar className="h-3 w-3" />
-                          {format(new Date(prediction.created_at), "PPp")}
-                        </CardDescription>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => exportSinglePrediction(prediction)}
-                      title="Download Report"
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {/* Patient Details */}
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-sm text-muted-foreground flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        Patient Information
-                      </h4>
-                      <div className="space-y-1">
-                        <p className="font-medium">{prediction.patient_details.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {prediction.patient_details.gender} • Age {prediction.patient_details.age}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Doctor Details */}
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-sm text-muted-foreground flex items-center gap-2">
-                        <Stethoscope className="h-4 w-4" />
-                        Consulting Doctor
-                      </h4>
-                      <div className="space-y-1">
-                        <p className="font-medium">{prediction.doctor_details.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {prediction.doctor_details.specialization}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Results */}
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-sm text-muted-foreground">
-                        Results
-                      </h4>
-                      {renderResultSummary(prediction)}
-                    </div>
-                  </div>
-
-                  {prediction.notes && (
-                    <div className="mt-4 pt-4 border-t">
-                      <p className="text-sm text-muted-foreground">
-                        <span className="font-semibold">Notes:</span> {prediction.notes}
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Total Reports
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{totalCount}</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Stethoscope className="h-4 w-4" />
+                Treatment
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{stats.treatment}</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Activity className="h-4 w-4" />
+                Survival
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{stats.survival}</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <ImageIcon className="h-4 w-4" />
+                Image Analysis
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{stats.image}</div>
+            </CardContent>
+          </Card>
         </div>
 
+        {/* Tabs Section */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="all">All Reports</TabsTrigger>
+            <TabsTrigger value="treatment">Treatment</TabsTrigger>
+            <TabsTrigger value="survival">Survival</TabsTrigger>
+            <TabsTrigger value="image">Image Analysis</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={activeTab} className="mt-6 space-y-4">
+            {filteredPredictions.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-16">
+                  <Clock className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                  <p className="text-lg text-muted-foreground">No reports found</p>
+                  <p className="text-sm text-muted-foreground/70">Reports will appear here once predictions are made</p>
+                </CardContent>
+              </Card>
+            ) : (
+              filteredPredictions.map((prediction, index) => (
+                <motion.div
+                  key={prediction.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                >
+                  <Card className="hover:shadow-xl transition-all duration-300 hover:border-primary/50">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
+                            {getPredictionIcon(prediction.prediction_type)}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <CardTitle className="text-xl">
+                                {getPredictionBadge(prediction.prediction_type)}
+                              </CardTitle>
+                              <Badge variant="outline" className="text-xs">
+                                ID: {prediction.id}
+                              </Badge>
+                            </div>
+                            <CardDescription className="flex items-center gap-2">
+                              <Calendar className="h-3 w-3" />
+                              {format(new Date(prediction.created_at), "PPp")}
+                            </CardDescription>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => exportSinglePrediction(prediction)}
+                          className="hover:bg-primary/10 hover:text-primary gap-2"
+                        >
+                          <Download className="h-4 w-4" />
+                          <span className="hidden sm:inline">Download</span>
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-3 gap-6">
+                        {/* Patient Details */}
+                        <div className="space-y-3 p-4 rounded-lg bg-muted/30">
+                          <h4 className="font-semibold text-sm text-muted-foreground flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            Patient Information
+                          </h4>
+                          <div className="space-y-2">
+                            <p className="font-semibold text-lg">{prediction.patient_details.name}</p>
+                            <div className="flex gap-3 text-sm text-muted-foreground">
+                              <span className="px-2 py-1 rounded bg-background">{prediction.patient_details.gender}</span>
+                              <span className="px-2 py-1 rounded bg-background">Age {prediction.patient_details.age}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Doctor Details */}
+                        <div className="space-y-3 p-4 rounded-lg bg-muted/30">
+                          <h4 className="font-semibold text-sm text-muted-foreground flex items-center gap-2">
+                            <Stethoscope className="h-4 w-4" />
+                            Consulting Doctor
+                          </h4>
+                          <div className="space-y-2">
+                            <p className="font-semibold text-lg">{prediction.doctor_details.name}</p>
+                            <p className="text-sm px-2 py-1 rounded bg-background text-muted-foreground">
+                              {prediction.doctor_details.specialization}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Results */}
+                        <div className="space-y-3 p-4 rounded-lg bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
+                          <h4 className="font-semibold text-sm text-muted-foreground">
+                            Prediction Results
+                          </h4>
+                          {renderResultSummary(prediction)}
+                        </div>
+                      </div>
+
+                      {prediction.notes && (
+                        <div className="mt-4 pt-4 border-t">
+                          <div className="p-3 rounded-lg bg-muted/30">
+                            <p className="text-sm">
+                              <span className="font-semibold text-foreground">Clinical Notes:</span>
+                              <span className="text-muted-foreground ml-2">{prediction.notes}</span>
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))
+            )}
+          </TabsContent>
+        </Tabs>
+
         {/* Pagination */}
-        {(hasNext || hasPrevious) && (
-          <div className="flex justify-center gap-2 mt-6">
+        {(hasNext || hasPrevious) && filteredPredictions.length > 0 && (
+          <div className="flex justify-center items-center gap-4 mt-8">
             <Button
               variant="outline"
               onClick={() => setCurrentPage((p) => p - 1)}
               disabled={!hasPrevious}
+              className="gap-2"
             >
-              <ChevronLeft className="h-4 w-4 mr-1" />
+              <ChevronLeft className="h-4 w-4" />
               Previous
             </Button>
-            <div className="flex items-center px-4 text-sm text-muted-foreground">
-              Page {currentPage}
+            <div className="flex items-center px-6 py-2 rounded-lg bg-muted">
+              <span className="text-sm font-medium">Page {currentPage}</span>
             </div>
             <Button
               variant="outline"
               onClick={() => setCurrentPage((p) => p + 1)}
               disabled={!hasNext}
+              className="gap-2"
             >
               Next
-              <ChevronRight className="h-4 w-4 ml-1" />
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         )}
