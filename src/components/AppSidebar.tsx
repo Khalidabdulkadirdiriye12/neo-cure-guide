@@ -22,7 +22,7 @@ const adminMainItems = [
   { title: "User Management", url: "/user-management", icon: UserCog },
   { title: "Doctor Management", url: "/doctor-management", icon: UserPlus },
   { title: "Patient Management", url: "/patient-management", icon: Users },
-  { title: "Predictions History", url: "/predictions-history", icon: History },
+  { title: "Reports", url: "/predictions-history", icon: History },
 ];
 
 const doctorMainItems = [
@@ -30,7 +30,7 @@ const doctorMainItems = [
   { title: "Treatment Recommender", url: "/treatment-recommender", icon: Stethoscope },
   { title: "Tumor Detection", url: "/tumor-detection", icon: Image },
   { title: "Survival Prediction", url: "/survival-prediction", icon: Activity },
-  { title: "Predictions History", url: "/predictions-history", icon: History },
+  { title: "Reports", url: "/predictions-history", icon: History },
   { title: "Patient Management", url: "/patient-management", icon: Users },
   { title: "Doctor Management", url: "/doctor-management", icon: UserPlus },
 ];
