@@ -11,15 +11,16 @@ interface Prediction {
   prediction_type: string;
   result: any;
   created_at: string;
-  patient: {
+  patient_details: {
     id: number;
-    first_name: string;
-    last_name: string;
+    name: string;
+    gender: string;
+    age: number;
   };
-  doctor: {
+  doctor_details: {
     id: number;
-    first_name: string;
-    last_name: string;
+    name: string;
+    specialization: string;
   };
 }
 
@@ -135,14 +136,14 @@ export default function Predictions() {
                   <User className="h-4 w-4 text-muted-foreground" />
                   <span className="text-muted-foreground">Patient:</span>
                   <span className="font-medium">
-                    {prediction.patient.first_name} {prediction.patient.last_name}
+                    {prediction.patient_details?.name || 'N/A'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <UserCircle className="h-4 w-4 text-muted-foreground" />
                   <span className="text-muted-foreground">Doctor:</span>
                   <span className="font-medium">
-                    {prediction.doctor.first_name} {prediction.doctor.last_name}
+                    {prediction.doctor_details?.name || 'N/A'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
