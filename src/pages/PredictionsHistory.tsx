@@ -4,9 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Activity, Image as ImageIcon, Stethoscope, User, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Activity, Image as ImageIcon, Stethoscope, User, Calendar, ChevronLeft, ChevronRight, Download, FileDown, FileText } from "lucide-react";
 import apiClient from "@/services/api";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 interface PredictionResult {
   id: number;
@@ -43,6 +44,7 @@ const PredictionsHistory = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   const [hasPrevious, setHasPrevious] = useState(false);
+  const { toast } = useToast();
 
   const fetchPredictions = async (page: number = 1) => {
     try {
@@ -86,6 +88,121 @@ const PredictionsHistory = () => {
     };
     const config = variants[type] || variants.treatment;
     return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
+
+  const exportToCSV = (data: PredictionResult[]) => {
+    const headers = [
+      "ID",
+      "Type",
+      "Patient Name",
+      "Patient Age",
+      "Patient Gender",
+      "Doctor Name",
+      "Doctor Specialization",
+      "Result",
+      "Date",
+      "Notes"
+    ];
+
+    const rows = data.map(pred => {
+      let resultString = "";
+      if (pred.prediction_type === "treatment") {
+        resultString = Object.entries(pred.result)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join("; ");
+      } else if (pred.prediction_type === "survival") {
+        resultString = `${pred.result.prediction} (${(pred.result.probability * 100).toFixed(1)}%)`;
+      } else if (pred.prediction_type === "image") {
+        resultString = `${pred.result.prediction} (${(pred.result.confidence * 100).toFixed(1)}% confidence)`;
+      }
+
+      return [
+        pred.id,
+        pred.prediction_type,
+        pred.patient_details.name,
+        pred.patient_details.age,
+        pred.patient_details.gender,
+        pred.doctor_details.name,
+        pred.doctor_details.specialization,
+        resultString,
+        format(new Date(pred.created_at), "PPp"),
+        pred.notes || ""
+      ];
+    });
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `predictions_export_${format(new Date(), "yyyy-MM-dd_HH-mm")}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Export Successful",
+      description: `Downloaded ${data.length} predictions as CSV`,
+    });
+  };
+
+  const exportToJSON = (data: PredictionResult[]) => {
+    const jsonContent = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonContent], { type: "application/json" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `predictions_export_${format(new Date(), "yyyy-MM-dd_HH-mm")}.json`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Export Successful",
+      description: `Downloaded ${data.length} predictions as JSON`,
+    });
+  };
+
+  const exportSinglePrediction = (prediction: PredictionResult) => {
+    const report = {
+      id: prediction.id,
+      type: prediction.prediction_type,
+      date: format(new Date(prediction.created_at), "PPpp"),
+      patient: {
+        name: prediction.patient_details.name,
+        age: prediction.patient_details.age,
+        gender: prediction.patient_details.gender,
+      },
+      doctor: {
+        name: prediction.doctor_details.name,
+        specialization: prediction.doctor_details.specialization,
+      },
+      result: prediction.result,
+      input_data: prediction.input_data,
+      notes: prediction.notes,
+    };
+
+    const jsonContent = JSON.stringify(report, null, 2);
+    const blob = new Blob([jsonContent], { type: "application/json" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `prediction_${prediction.id}_${prediction.prediction_type}_${format(new Date(), "yyyy-MM-dd")}.json`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Report Downloaded",
+      description: `Downloaded prediction report for ${prediction.patient_details.name}`,
+    });
   };
 
   const renderResultSummary = (prediction: PredictionResult) => {
@@ -163,7 +280,7 @@ const PredictionsHistory = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
               Predictions History
@@ -171,6 +288,24 @@ const PredictionsHistory = () => {
             <p className="text-muted-foreground mt-2">
               View all AI predictions made across the platform ({totalCount} total)
             </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => exportToCSV(predictions)}
+              disabled={predictions.length === 0}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => exportToJSON(predictions)}
+              disabled={predictions.length === 0}
+            >
+              <FileDown className="h-4 w-4 mr-2" />
+              Export JSON
+            </Button>
           </div>
         </div>
 
@@ -199,6 +334,14 @@ const PredictionsHistory = () => {
                         </CardDescription>
                       </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => exportSinglePrediction(prediction)}
+                      title="Download Report"
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
