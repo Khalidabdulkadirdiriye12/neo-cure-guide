@@ -11,6 +11,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Index from "./pages/Index";
 import TumorDetection from "./pages/TumorDetection";
 import SurvivalPrediction from "./pages/SurvivalPrediction";
+import Predictions from "./pages/Predictions";
 import PredictionsHistory from "./pages/PredictionsHistory";
 import PatientManagement from "./pages/PatientManagement";
 import DoctorManagement from "./pages/DoctorManagement";
@@ -87,6 +88,7 @@ const App = () => (
                   </ProtectedRoute>
                 } 
               />
+              <Route path="/predictions" element={<Predictions />} />
               <Route path="/predictions-history" element={<PredictionsHistory />} />
               <Route path="/patient-management" element={<PatientManagement />} />
               <Route path="/doctor-management" element={<DoctorManagement />} />

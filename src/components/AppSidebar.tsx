@@ -1,4 +1,4 @@
-import { Activity, Image, Stethoscope, Users, UserPlus, KeyRound, UserCog, LayoutDashboard, History } from "lucide-react";
+import { Activity, Image, Stethoscope, Users, UserPlus, KeyRound, UserCog, LayoutDashboard, History, FileText } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { NeuralNexusLogo } from "@/components/NeuralNexusLogo";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,6 +22,7 @@ const adminMainItems = [
   { title: "User Management", url: "/user-management", icon: UserCog },
   { title: "Doctor Management", url: "/doctor-management", icon: UserPlus },
   { title: "Patient Management", url: "/patient-management", icon: Users },
+  { title: "Predictions", url: "/predictions", icon: FileText },
   { title: "Reports", url: "/predictions-history", icon: History },
 ];
 
@@ -30,6 +31,7 @@ const doctorMainItems = [
   { title: "Treatment Recommender", url: "/treatment-recommender", icon: Stethoscope },
   { title: "Tumor Detection", url: "/tumor-detection", icon: Image },
   { title: "Survival Prediction", url: "/survival-prediction", icon: Activity },
+  { title: "Predictions", url: "/predictions", icon: FileText },
   { title: "Reports", url: "/predictions-history", icon: History },
   { title: "Patient Management", url: "/patient-management", icon: Users },
   { title: "Doctor Management", url: "/doctor-management", icon: UserPlus },
