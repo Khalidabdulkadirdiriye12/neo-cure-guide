@@ -24,8 +24,8 @@ interface Prediction {
 }
 
 const fetchPredictions = async (): Promise<Prediction[]> => {
-  const response = await apiClient.get("/predictions/");
-  return response.data;
+  const response = await apiClient.get("/api/predictions/predictions/");
+  return response.data.results || response.data;
 };
 
 const getPredictionIcon = (type: string) => {
