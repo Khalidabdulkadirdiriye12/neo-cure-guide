@@ -18,10 +18,14 @@ const Login = () => {
   const { user, login } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect to dashboard when user logs in successfully
+  // Redirect based on user role when user logs in successfully
   useEffect(() => {
     if (user) {
-      navigate("/dashboard", { replace: true });
+      if (user.role === "admin") {
+        navigate("/admin-dashboard", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
     }
   }, [user, navigate]);
 

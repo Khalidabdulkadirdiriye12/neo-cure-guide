@@ -17,18 +17,22 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 
-const mainItems = [
+const adminMainItems = [
+  { title: "Admin Dashboard", url: "/admin-dashboard", icon: LayoutDashboard },
+  { title: "User Management", url: "/user-management", icon: UserCog },
+  { title: "Doctor Management", url: "/doctor-management", icon: UserPlus },
+  { title: "Patient Management", url: "/patient-management", icon: Users },
+  { title: "Predictions History", url: "/predictions-history", icon: History },
+];
+
+const doctorMainItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Treatment Recommender", url: "/", icon: Stethoscope },
+  { title: "Treatment Recommender", url: "/treatment-recommender", icon: Stethoscope },
   { title: "Tumor Detection", url: "/tumor-detection", icon: Image },
   { title: "Survival Prediction", url: "/survival-prediction", icon: Activity },
   { title: "Predictions History", url: "/predictions-history", icon: History },
   { title: "Patient Management", url: "/patient-management", icon: Users },
   { title: "Doctor Management", url: "/doctor-management", icon: UserPlus },
-];
-
-const adminItems = [
-  { title: "User Management", url: "/user-management", icon: UserCog },
 ];
 
 const footerItems = [
@@ -38,6 +42,8 @@ const footerItems = [
 export function AppSidebar() {
   const { open } = useSidebar();
   const { isAdmin, isDoctor } = useAuth();
+
+  const menuItems = isAdmin ? adminMainItems : doctorMainItems;
 
   return (
     <Sidebar collapsible="icon">
@@ -56,18 +62,12 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>AI Tools</SidebarGroupLabel>
+          <SidebarGroupLabel>{isAdmin ? "Admin Tools" : "AI Tools"}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainItems.map((item) => {
+              {menuItems.map((item) => {
                 // Hide Doctor Management from doctors
                 if (item.url === "/doctor-management" && isDoctor && !isAdmin) {
-                  return null;
-                }
-                
-                // Hide prediction tools and dashboard from admins (only doctors can access)
-                const doctorOnlyTools = ["/", "/tumor-detection", "/survival-prediction", "/dashboard"];
-                if (doctorOnlyTools.includes(item.url) && isAdmin && !isDoctor) {
                   return null;
                 }
                 
@@ -90,31 +90,6 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Admin</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {adminItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title}>
-                      <NavLink 
-                        to={item.url}
-                        className={({ isActive }) =>
-                          isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : ""
-                        }
-                      >
-                        <item.icon />
-                        {open && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
       </SidebarContent>
       <SidebarFooter className="border-t p-2">
         <SidebarMenu>

@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import Index from "./pages/Index";
 import TumorDetection from "./pages/TumorDetection";
 import SurvivalPrediction from "./pages/SurvivalPrediction";
@@ -22,8 +23,13 @@ const queryClient = new QueryClient();
 
 // Auth redirect component
 const AuthRedirect = () => {
-  const { user } = useAuth();
-  return user ? <Navigate to="/" replace /> : <Navigate to="/login" replace />;
+  const { user, isLoading, isAdmin } = useAuth();
+  
+  if (isLoading) return null;
+  
+  if (!user) return <Navigate to="/login" replace />;
+  
+  return <Navigate to={isAdmin ? "/admin-dashboard" : "/dashboard"} replace />;
 };
 
 const App = () => (
@@ -40,6 +46,15 @@ const App = () => (
             
             {/* Protected routes */}
             <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+              <Route path="/" element={<AuthRedirect />} />
+              <Route 
+                path="/admin-dashboard" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } 
+              />
               <Route 
                 path="/dashboard" 
                 element={
@@ -48,9 +63,30 @@ const App = () => (
                   </ProtectedRoute>
                 } 
               />
-              <Route path="/" element={<Index />} />
-              <Route path="/tumor-detection" element={<TumorDetection />} />
-              <Route path="/survival-prediction" element={<SurvivalPrediction />} />
+              <Route 
+                path="/treatment-recommender"
+                element={
+                  <ProtectedRoute requireDoctor>
+                    <Index />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/tumor-detection" 
+                element={
+                  <ProtectedRoute requireDoctor>
+                    <TumorDetection />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/survival-prediction" 
+                element={
+                  <ProtectedRoute requireDoctor>
+                    <SurvivalPrediction />
+                  </ProtectedRoute>
+                } 
+              />
               <Route path="/predictions-history" element={<PredictionsHistory />} />
               <Route path="/patient-management" element={<PatientManagement />} />
               <Route path="/doctor-management" element={<DoctorManagement />} />
